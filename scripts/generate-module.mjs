@@ -164,8 +164,8 @@ function addRustHandler(libSource, snakeName, commandName) {
   if (libSource.includes(handler)) return libSource;
 
   return libSource.replace(
-    /tools::background::remove_white_background\n/,
-    `tools::background::remove_white_background,\n            ${handler}\n`,
+    /(generate_handler!\[[\s\S]*?)(\n\s+\]\))/,
+    `$1,\n            ${handler}$2`,
   );
 }
 

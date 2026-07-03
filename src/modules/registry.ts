@@ -53,7 +53,7 @@ export const tools: ToolDefinition[] = [
     category: "PDF",
     icon: FilePdf,
     accent: "#f87171",
-    status: "available",
+    status: "soon",
   },
   {
     id: "video-converter",
@@ -62,7 +62,7 @@ export const tools: ToolDefinition[] = [
     category: "Multimedia",
     icon: VideoCamera,
     accent: "#fbbf24",
-    status: "available",
+    status: "soon",
   },
   {
     id: "batch-renamer",
@@ -71,7 +71,7 @@ export const tools: ToolDefinition[] = [
     category: "Productividad",
     icon: ArrowsClockwise,
     accent: "#22d3ee",
-    status: "available",
+    status: "soon",
   },
 ];
 

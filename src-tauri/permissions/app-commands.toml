@@ -1,0 +1,19 @@
+[[permission]]
+identifier = "allow-generate-qr"
+description = "Permite generar códigos QR"
+commands.allow = ["generate_qr"]
+
+[[permission]]
+identifier = "allow-remove-white-background"
+description = "Permite quitar fondo blanco"
+commands.allow = ["remove_white_background"]
+
+[[permission]]
+identifier = "allow-image-converter"
+description = "Permite convertir imágenes"
+commands.allow = ["image_converter"]
+
+[[permission]]
+identifier = "allow-image-resizer"
+description = "Permite redimensionar imágenes"
+commands.allow = ["image_resizer"]

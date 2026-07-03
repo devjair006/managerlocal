@@ -9,6 +9,10 @@
     "core:window:allow-close",
     "core:window:allow-minimize",
     "core:window:allow-toggle-maximize",
-    "core:window:allow-start-dragging"
+    "core:window:allow-start-dragging",
+    "allow-generate-qr",
+    "allow-remove-white-background",
+    "allow-image-converter",
+    "allow-image-resizer"
   ]
 }
