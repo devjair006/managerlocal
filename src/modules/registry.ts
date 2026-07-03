@@ -44,7 +44,7 @@ export const tools: ToolDefinition[] = [
     category: "Imágenes",
     icon: Resize,
     accent: "#34d399",
-    status: "soon",
+    status: "available",
   },
   {
     id: "pdf-tools",
@@ -53,7 +53,7 @@ export const tools: ToolDefinition[] = [
     category: "PDF",
     icon: FilePdf,
     accent: "#f87171",
-    status: "soon",
+    status: "available",
   },
   {
     id: "video-converter",
