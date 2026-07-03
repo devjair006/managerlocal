@@ -71,7 +71,7 @@ export const tools: ToolDefinition[] = [
     category: "Productividad",
     icon: ArrowsClockwise,
     accent: "#22d3ee",
-    status: "soon",
+    status: "available",
   },
 ];
 
