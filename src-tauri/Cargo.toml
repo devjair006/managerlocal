@@ -1,0 +1,19 @@
+[package]
+name = "manager-local"
+version = "0.1.0"
+description = "Herramientas privadas para el escritorio"
+edition = "2021"
+
+[lib]
+name = "manager_local_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["macos-private-api"] }
+serde = { version = "1", features = ["derive"] }
+qrcode = "0.14"
+image = "0.25"
+base64 = "0.22"
