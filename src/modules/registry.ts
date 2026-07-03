@@ -62,7 +62,7 @@ export const tools: ToolDefinition[] = [
     category: "Multimedia",
     icon: VideoCamera,
     accent: "#fbbf24",
-    status: "soon",
+    status: "available",
   },
   {
     id: "batch-renamer",

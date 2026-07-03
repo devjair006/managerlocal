@@ -11,6 +11,7 @@ import { categories, tools } from "./modules/registry";
 import { QrGenerator } from "./modules/qr-generator/QrGenerator";
 import { WindowControls } from "./components/WindowControls";
 import { BackgroundRemover } from "./modules/background-remover/BackgroundRemover";
+import { VideoConverter } from "./modules/video-converter/VideoConverter";
 import { PdfTools } from "./modules/pdf-tools/PdfTools";
 import { ImageResizer } from "./modules/image-resizer/ImageResizer";
 import { ImageConverter } from "./modules/image-converter/ImageConverter";
