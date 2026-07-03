@@ -17,3 +17,18 @@ commands.allow = ["image_converter"]
 identifier = "allow-image-resizer"
 description = "Permite redimensionar imágenes"
 commands.allow = ["image_resizer"]
+
+[[permission]]
+identifier = "allow-pdf-tools"
+description = "Permite procesar documentos PDF seleccionados"
+commands.allow = ["pdf_tools"]
+
+[[permission]]
+identifier = "allow-video-converter"
+description = "Permite convertir audio y video con FFmpeg"
+commands.allow = ["video_converter", "ffmpeg_available"]
+
+[[permission]]
+identifier = "allow-batch-renamer"
+description = "Permite renombrar los archivos seleccionados"
+commands.allow = ["batch_renamer"]

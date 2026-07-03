@@ -49,20 +49,20 @@ export const tools: ToolDefinition[] = [
   {
     id: "pdf-tools",
     name: "Herramientas PDF",
-    description: "Une, divide, ordena y comprime documentos PDF.",
+    description: "Une, extrae páginas y optimiza documentos PDF.",
     category: "PDF",
     icon: FilePdf,
     accent: "#f87171",
-    status: "soon",
+    status: "available",
   },
   {
     id: "video-converter",
-    name: "Convertir video",
-    description: "Convierte formatos de audio y video usando FFmpeg.",
+    name: "Convertir multimedia",
+    description: "Convierte audio y video a seis formatos usando FFmpeg.",
     category: "Multimedia",
     icon: VideoCamera,
     accent: "#fbbf24",
-    status: "soon",
+    status: "available",
   },
   {
     id: "batch-renamer",
@@ -71,7 +71,7 @@ export const tools: ToolDefinition[] = [
     category: "Productividad",
     icon: ArrowsClockwise,
     accent: "#22d3ee",
-    status: "soon",
+    status: "available",
   },
 ];
 

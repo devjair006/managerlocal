@@ -17,3 +17,5 @@ serde = { version = "1", features = ["derive"] }
 qrcode = "0.14"
 image = "0.25"
 base64 = "0.22"
+tauri-plugin-dialog = "2.7.1"
+lopdf = "0.42"

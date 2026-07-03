@@ -13,6 +13,10 @@
     "allow-generate-qr",
     "allow-remove-white-background",
     "allow-image-converter",
-    "allow-image-resizer"
+    "allow-image-resizer",
+    "allow-pdf-tools",
+    "allow-video-converter",
+    "allow-batch-renamer",
+    "dialog:default"
   ]
 }

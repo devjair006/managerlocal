@@ -66,4 +66,16 @@ En `qr.rs`:
 1. Instalar el toolchain de Rust y compilar la ventana Tauri.
 2. Añadir controles nativos de minimizar, maximizar y cerrar.
 3. Persistir transparencia y preferencias.
-4. Implementar el conversor de imágenes como segundo módulo.
+4. Empaquetar FFmpeg como sidecar antes de distribuir la aplicación a otros equipos.
+
+## Herramientas disponibles
+
+- Generador QR.
+- Quitar fondo blanco.
+- Convertir imágenes entre PNG, JPG y WebP.
+- Redimensionar imágenes conservando proporción.
+- Unir, extraer páginas y optimizar PDF.
+- Convertir audio y video con FFmpeg a MP4, WebM, GIF, MP3, M4A y WAV.
+- Renombrar archivos por lotes con prefijo, sufijo, reemplazo y numeración.
+
+La conversión multimedia usa `ffmpeg` desde el `PATH` del sistema. Durante el desarrollo puedes comprobarlo con `ffmpeg -version`. Para un instalador público deberá incluirse como binario sidecar.
