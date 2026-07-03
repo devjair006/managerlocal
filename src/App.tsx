@@ -33,7 +33,7 @@ export function App() {
   const [category, setCategory] = useState<(typeof categories)[number]>("Todas");
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [opacity, setOpacity] = useState(88);
+  const [opacity, setOpacity] = useState(100);
 
   const filteredTools = useMemo(() => tools.filter((tool) => {
     const matchesCategory = category === "Todas" || tool.category === category;
