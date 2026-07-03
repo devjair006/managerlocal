@@ -133,22 +133,23 @@ function upsertRegistryEntry(registrySource, entry, icon) {
   return next;
 }
 
-function addAppImport(appSource, id, componentName) {
-  const importLine = `import { ${componentName} } from "./modules/${id}/${componentName}";`;
-  if (appSource.includes(importLine)) return appSource;
-  return appSource.replace(
-    /import \{ BackgroundRemover \} from "\.\/modules\/background-remover\/BackgroundRemover";/,
-    `import { BackgroundRemover } from "./modules/background-remover/BackgroundRemover";\n${importLine}`,
-  );
-}
+function addToolRoute(routesSource, id, componentName) {
+  const importLine = `import { ${componentName} } from "./${id}/${componentName}";`;
+  let next = routesSource;
 
-function addAppRoute(appSource, id, componentName) {
-  const route = `activeTool === "${id}" ? <${componentName} onBack={() => setActiveTool(null)} /> : `;
-  if (appSource.includes(route)) return appSource;
+  if (!next.includes(importLine)) {
+    next = next.replace(
+      /import \{ BatchRenamer \} from "\.\/batch-renamer\/BatchRenamer";/,
+      `import { BatchRenamer } from "./batch-renamer/BatchRenamer";\nimport { ${componentName} } from "./${id}/${componentName}";`,
+    );
+  }
 
-  return appSource.replace(
-    /activeTool === "background-remover" \? <BackgroundRemover onBack=\{\(\) => setActiveTool\(null\)\} \/> : \(/,
-    `activeTool === "background-remover" ? <BackgroundRemover onBack={() => setActiveTool(null)} /> : ${route}(`,
+  const routeLine = `  "${id}": ${componentName},`;
+  if (next.includes(routeLine)) return next;
+
+  return next.replace(
+    /  "batch-renamer": BatchRenamer,\n\};/,
+    `  "batch-renamer": BatchRenamer,\n  "${id}": ${componentName},\n};`,
   );
 }
 
@@ -281,7 +282,7 @@ if (!/^[a-z][a-z0-9-]*$/.test(id)) {
 }
 
 const registryPath = join(root, "src", "modules", "registry.ts");
-const appPath = join(root, "src", "App.tsx");
+const routesPath = join(root, "src", "modules", "tool-routes.tsx");
 const registrySource = readFileSync(registryPath, "utf8");
 const existingEntry = parseRegistryEntry(registrySource, id);
 
@@ -335,7 +336,10 @@ writeFileSync(
   registryPath,
   upsertRegistryEntry(registrySource, { id, name, description, category, accent }, icon),
 );
-writeFileSync(appPath, addAppRoute(addAppImport(readFileSync(appPath, "utf8"), id, componentName), id, componentName));
+writeFileSync(
+  routesPath,
+  addToolRoute(readFileSync(routesPath, "utf8"), id, componentName),
+);
 
 if (withRust) {
   const rustPath = join(root, "src-tauri", "src", "tools", `${commandName}.rs`);
@@ -351,7 +355,7 @@ console.log(`\nMódulo "${id}" creado:\n`);
 console.log(`  src/modules/${id}/${componentName}.tsx`);
 console.log(`  src/modules/${id}/${serviceFileName}`);
 console.log(`  src/modules/registry.ts  (${existingEntry ? "activado" : "entrada nueva"})`);
-console.log(`  src/App.tsx              (import + ruta)`);
+console.log(`  src/modules/tool-routes.tsx (ruta registrada)`);
 if (withRust) {
   console.log(`  src-tauri/src/tools/${commandName}.rs`);
   console.log(`  src-tauri/src/tools/mod.rs`);

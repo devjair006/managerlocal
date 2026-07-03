@@ -34,7 +34,7 @@ npm run gen:module -- hex-picker \
 | `src/modules/hex-picker/HexPicker.tsx` | Pantalla base |
 | `src/modules/hex-picker/hex-picker.service.ts` | Servicio con stub |
 | `src/modules/registry.ts` | Añade entrada con `status: "available"` |
-| `src/App.tsx` | Import + ruta en `activeTool` |
+| `src/modules/tool-routes.tsx` | Registra el componente en el mapa de rutas |
 
 Con procesamiento nativo:
 
@@ -78,7 +78,7 @@ npm run gen:module -- image-converter \
 | `src/modules/image-converter/ImageConverter.tsx` | Pantalla base |
 | `src/modules/image-converter/image-converter.service.ts` | Servicio + `invoke` |
 | `src/modules/registry.ts` | Solo activa: `soon` → `available` |
-| `src/App.tsx` | Import + ruta |
+| `src/modules/tool-routes.tsx` | Registra el componente en el mapa de rutas |
 | `src-tauri/src/tools/image_converter.rs` | Comando Rust (con `--rust`) |
 
 ---
@@ -145,7 +145,8 @@ src/modules/<id>/
   <id>.service.ts       # Lógica / invoke a Tauri
 
 src/modules/registry.ts # Entrada en el grid (nueva o activada)
-src/App.tsx             # Routing por activeTool
+src/modules/tool-routes.tsx # Mapa id → componente (lo usa App.tsx)
+src/App.tsx             # Lee toolViews y renderiza la pantalla activa
 
 # Solo con --rust:
 src-tauri/src/tools/<id_snake>.rs

@@ -8,14 +8,8 @@ import {
 } from "@phosphor-icons/react";
 import logo from "./assets/logoManagerTools.png";
 import { categories, tools } from "./modules/registry";
-import { QrGenerator } from "./modules/qr-generator/QrGenerator";
+import { toolViews } from "./modules/tool-routes";
 import { WindowControls } from "./components/WindowControls";
-import { BackgroundRemover } from "./modules/background-remover/BackgroundRemover";
-import { BatchRenamer } from "./modules/batch-renamer/BatchRenamer";
-import { VideoConverter } from "./modules/video-converter/VideoConverter";
-import { PdfTools } from "./modules/pdf-tools/PdfTools";
-import { ImageResizer } from "./modules/image-resizer/ImageResizer";
-import { ImageConverter } from "./modules/image-converter/ImageConverter";
 
 async function handleTitlebarMouseDown(event: React.MouseEvent<HTMLElement>) {
   if (!("__TAURI_INTERNALS__" in window) || event.button !== 0) return;
@@ -46,6 +40,8 @@ export function App() {
     return matchesCategory && `${tool.name} ${tool.description}`.toLocaleLowerCase().includes(needle);
   }), [category, search]);
 
+  const ActiveTool = activeTool ? toolViews[activeTool] : null;
+
   return (
     <div className="desktop-stage" style={{ "--panel-opacity": opacity / 100 } as React.CSSProperties}>
       <div className="app-window">
@@ -69,11 +65,11 @@ export function App() {
           </aside>
 
           <main className="content">
-            {activeTool === "qr-generator" ? <QrGenerator onBack={() => setActiveTool(null)} /> : activeTool === "background-remover" ? <BackgroundRemover onBack={() => setActiveTool(null)} /> : activeTool === "image-converter" ? <ImageConverter onBack={() => setActiveTool(null)} /> : (
+            {ActiveTool ? <ActiveTool onBack={() => setActiveTool(null)} /> : (
               <>
                 <div className="content-header"><div><p className="eyebrow">Tu espacio privado</p><h1>Todas las herramientas</h1><p>Utilidades rápidas, sin subir tus archivos a internet.</p></div><div className="search"><MagnifyingGlass /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar herramienta..." /><kbd>Ctrl K</kbd></div></div>
                 <div className="filter-row">{categories.map((item) => <button key={item} className={category === item ? "filter active" : "filter"} onClick={() => setCategory(item)}>{item}</button>)}</div>
-                <div className="tool-grid">{filteredTools.map((tool) => { const Icon = tool.icon; return <button className="tool-card" key={tool.id} onClick={() => tool.status === "available" && setActiveTool(tool.id)} disabled={tool.status === "soon"}><span className="card-icon" style={{ color: tool.accent, backgroundColor: `${tool.accent}1c` }}><Icon weight="duotone" /></span><span className="card-copy"><strong>{tool.name}</strong><small>{tool.description}</small></span><span className={tool.status === "available" ? "status ready" : "status"}>{tool.status === "available" ? "Abrir" : "Próximamente"}</span></button>; })}</div>
+                <div className="tool-grid">{filteredTools.map((tool) => { const Icon = tool.icon; const canOpen = tool.status === "available" && Boolean(toolViews[tool.id]); return <button className="tool-card" key={tool.id} onClick={() => canOpen && setActiveTool(tool.id)} disabled={!canOpen}><span className="card-icon" style={{ color: tool.accent, backgroundColor: `${tool.accent}1c` }}><Icon weight="duotone" /></span><span className="card-copy"><strong>{tool.name}</strong><small>{tool.description}</small></span><span className={canOpen ? "status ready" : "status"}>{canOpen ? "Abrir" : "Próximamente"}</span></button>; })}</div>
                 {!filteredTools.length && <div className="empty-state"><MagnifyingGlass /><strong>No encontramos esa herramienta</strong><span>Prueba con otra búsqueda o categoría.</span></div>}
               </>
             )}
