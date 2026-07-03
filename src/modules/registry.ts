@@ -35,7 +35,7 @@ export const tools: ToolDefinition[] = [
     category: "Imágenes",
     icon: ImageSquare,
     accent: "#38bdf8",
-    status: "soon",
+    status: "available",
   },
   {
     id: "image-resizer",

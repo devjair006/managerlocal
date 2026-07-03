@@ -11,6 +11,7 @@ import { categories, tools } from "./modules/registry";
 import { QrGenerator } from "./modules/qr-generator/QrGenerator";
 import { WindowControls } from "./components/WindowControls";
 import { BackgroundRemover } from "./modules/background-remover/BackgroundRemover";
+import { ImageConverter } from "./modules/image-converter/ImageConverter";
 
 async function handleTitlebarMouseDown(event: React.MouseEvent<HTMLElement>) {
   if (!("__TAURI_INTERNALS__" in window) || event.button !== 0) return;
@@ -64,7 +65,7 @@ export function App() {
           </aside>
 
           <main className="content">
-            {activeTool === "qr-generator" ? <QrGenerator onBack={() => setActiveTool(null)} /> : activeTool === "background-remover" ? <BackgroundRemover onBack={() => setActiveTool(null)} /> : (
+            {activeTool === "qr-generator" ? <QrGenerator onBack={() => setActiveTool(null)} /> : activeTool === "background-remover" ? <BackgroundRemover onBack={() => setActiveTool(null)} /> : activeTool === "image-converter" ? <ImageConverter onBack={() => setActiveTool(null)} /> : (
               <>
                 <div className="content-header"><div><p className="eyebrow">Tu espacio privado</p><h1>Todas las herramientas</h1><p>Utilidades rápidas, sin subir tus archivos a internet.</p></div><div className="search"><MagnifyingGlass /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar herramienta..." /><kbd>Ctrl K</kbd></div></div>
                 <div className="filter-row">{categories.map((item) => <button key={item} className={category === item ? "filter active" : "filter"} onClick={() => setCategory(item)}>{item}</button>)}</div>
