@@ -4,11 +4,29 @@ import {
   GearSix,
   MagnifyingGlass,
   SquaresFour,
-  Toolbox,
   X,
 } from "@phosphor-icons/react";
+import logo from "./assets/logoManagerTools.png";
 import { categories, tools } from "./modules/registry";
 import { QrGenerator } from "./modules/qr-generator/QrGenerator";
+import { WindowControls } from "./components/WindowControls";
+import { BackgroundRemover } from "./modules/background-remover/BackgroundRemover";
+
+async function handleTitlebarMouseDown(event: React.MouseEvent<HTMLElement>) {
+  if (!("__TAURI_INTERNALS__" in window) || event.button !== 0) return;
+
+  const target = event.target as HTMLElement;
+  if (target.closest("button")) return;
+
+  const { getCurrentWindow } = await import("@tauri-apps/api/window");
+  const appWindow = getCurrentWindow();
+
+  if (event.detail === 2) {
+    await appWindow.toggleMaximize();
+  } else {
+    await appWindow.startDragging();
+  }
+}
 
 export function App() {
   const [search, setSearch] = useState("");
@@ -26,10 +44,13 @@ export function App() {
   return (
     <div className="desktop-stage" style={{ "--panel-opacity": opacity / 100 } as React.CSSProperties}>
       <div className="app-window">
-        <header className="titlebar" data-tauri-drag-region>
-          <div className="traffic-lights"><span /><span /><span /></div>
-          <div className="brand"><Toolbox weight="duotone" /><strong>Manager Local</strong></div>
-          <span className="local-badge">Todo permanece en tu equipo</span>
+        <header className="titlebar" data-tauri-drag-region onMouseDown={(event) => void handleTitlebarMouseDown(event)}>
+          <div className="brand" data-tauri-drag-region>
+            <img className="brand-logo" src={logo} alt="" data-tauri-drag-region />
+            <strong data-tauri-drag-region>Manager Local</strong>
+          </div>
+          <div className="titlebar-drag-area" data-tauri-drag-region><span className="local-badge" data-tauri-drag-region>Todo permanece en tu equipo</span></div>
+          <WindowControls />
         </header>
 
         <div className="app-body">
@@ -43,7 +64,7 @@ export function App() {
           </aside>
 
           <main className="content">
-            {activeTool === "qr-generator" ? <QrGenerator onBack={() => setActiveTool(null)} /> : (
+            {activeTool === "qr-generator" ? <QrGenerator onBack={() => setActiveTool(null)} /> : activeTool === "background-remover" ? <BackgroundRemover onBack={() => setActiveTool(null)} /> : (
               <>
                 <div className="content-header"><div><p className="eyebrow">Tu espacio privado</p><h1>Todas las herramientas</h1><p>Utilidades rápidas, sin subir tus archivos a internet.</p></div><div className="search"><MagnifyingGlass /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar herramienta..." /><kbd>Ctrl K</kbd></div></div>
                 <div className="filter-row">{categories.map((item) => <button key={item} className={category === item ? "filter active" : "filter"} onClick={() => setCategory(item)}>{item}</button>)}</div>

@@ -21,12 +21,12 @@ export const tools: ToolDefinition[] = [
   },
   {
     id: "background-remover",
-    name: "Quitar fondo",
-    description: "Separa el sujeto y exporta una imagen PNG transparente.",
+    name: "Quitar fondo blanco",
+    description: "Convierte fondos blancos en transparencia y exporta PNG.",
     category: "Imágenes",
     icon: MagicWand,
     accent: "#fb7185",
-    status: "soon",
+    status: "available",
   },
   {
     id: "image-converter",

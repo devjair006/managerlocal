@@ -31,6 +31,14 @@ El módulo QR muestra el patrón que utilizarán las demás herramientas:
 
 Este límite evita mezclar interfaz y procesamiento. Para añadir una herramienta nueva se repite el mismo recorrido sin modificar las demás.
 
+### Segundo ejemplo: quitar fondo blanco
+
+- `src/modules/background-remover/BackgroundRemover.tsx`: carga, vista previa, tolerancia y descarga.
+- `src/modules/background-remover/background.service.ts`: decide entre Canvas web o el comando nativo.
+- `src-tauri/src/tools/background.rs`: decodifica la imagen, recorre sus píxeles y vuelve transparentes los que superan el umbral de blanco.
+
+Este módulo elimina colores cercanos al blanco; no reconoce personas u objetos mediante IA. La tolerancia controla qué tan lejos del blanco puede estar un píxel antes de conservarse.
+
 ## Flujo React → Rust
 
 ```text
