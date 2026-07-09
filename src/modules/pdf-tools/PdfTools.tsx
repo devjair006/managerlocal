@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, CheckCircle, FilePdf, Files, Scissors, Stack } from "@phosphor-icons/react";
-import { pdfTools, pickPdfFiles, pickPdfOutput, type PdfOperation } from "./pdf-tools.service";
+import { ArrowLeft, CheckCircle, FilePdf, Files, Images, Scissors, Stack } from "@phosphor-icons/react";
+import { pdfTools, pickImageFiles, pickOutputDirectory, pickPdfFiles, pickPdfOutput, type PdfOperation } from "./pdf-tools.service";
 
 interface Props { onBack: () => void; }
 
@@ -26,6 +26,8 @@ const operations: { id: PdfOperation; label: string; description: string; icon: 
   { id: "merge", label: "Unir", description: "Combina varios PDF en el orden seleccionado", icon: Stack },
   { id: "extract", label: "Extraer", description: "Crea un PDF con páginas específicas", icon: Scissors },
   { id: "compress", label: "Optimizar", description: "Elimina objetos sin uso y comprime estructuras", icon: Files },
+  { id: "images_to_pdf", label: "Imágenes a PDF", description: "Crea una página por cada imagen", icon: Images },
+  { id: "pdf_to_images", label: "PDF a imágenes", description: "Exporta cada página como PNG", icon: FilePdf },
 ];
 
 export function PdfTools({ onBack }: Props) {
@@ -37,7 +39,7 @@ export function PdfTools({ onBack }: Props) {
   const [error, setError] = useState("");
 
   async function chooseFiles() {
-    try { setPaths(await pickPdfFiles(operation === "merge")); setResult(""); setError(""); }
+    try { setPaths(operation === "images_to_pdf" ? await pickImageFiles() : await pickPdfFiles(operation === "merge")); setResult(""); setError(""); }
     catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)); }
   }
 
@@ -45,7 +47,7 @@ export function PdfTools({ onBack }: Props) {
     if (!paths.length) { setError("Selecciona los documentos PDF"); return; }
     setProcessing(true);
     try {
-      const output = await pickPdfOutput(operation === "merge" ? "documentos-unidos.pdf" : operation === "extract" ? "paginas-extraidas.pdf" : "documento-optimizado.pdf");
+      const output = operation === "pdf_to_images" ? await pickOutputDirectory() : await pickPdfOutput(operation === "merge" ? "documentos-unidos.pdf" : operation === "extract" ? "paginas-extraidas.pdf" : operation === "images_to_pdf" ? "imagenes.pdf" : "documento-optimizado.pdf");
       if (!output) return;
       const pages = operation === "extract" ? parsePages(pageText) : [];
       setResult(await pdfTools({ operation, inputPaths: paths, outputPath: output, pages }));
@@ -57,13 +59,15 @@ export function PdfTools({ onBack }: Props) {
   return (
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-      <div className="tool-heading"><span className="tool-heading-icon pdf-icon"><FilePdf weight="duotone" /></span><div><p className="eyebrow">PDF</p><h1>Herramientas PDF</h1><p>Une, extrae páginas y optimiza documentos localmente.</p></div></div>
+      <div className="tool-heading"><span className="tool-heading-icon pdf-icon"><FilePdf weight="duotone" /></span><div><p className="eyebrow">PDF</p><h1>Herramientas PDF</h1><p>Une, extrae, optimiza y convierte documentos localmente.</p></div></div>
       <div className="operation-tabs">{operations.map(({ id, label, description, icon: Icon }) => <button key={id} className={operation === id ? "operation-tab active" : "operation-tab"} onClick={() => { setOperation(id); setPaths([]); setResult(""); }}><Icon weight="duotone" /><span><strong>{label}</strong><small>{description}</small></span></button>)}</div>
       <div className="file-tool-panel">
-        <div className="file-picker-row"><div><strong>{operation === "merge" ? "Documentos a combinar" : "Documento de entrada"}</strong><small>{paths.length ? `${paths.length} archivo(s) seleccionado(s)` : "No has seleccionado archivos"}</small></div><button className="secondary-button" onClick={() => void chooseFiles()}>Seleccionar PDF</button></div>
+        <div className="file-picker-row"><div><strong>{operation === "merge" ? "Documentos a combinar" : operation === "images_to_pdf" ? "Imágenes y orden de páginas" : "Documento de entrada"}</strong><small>{paths.length ? `${paths.length} archivo(s) seleccionado(s)` : "No has seleccionado archivos"}</small></div><button className="secondary-button" onClick={() => void chooseFiles()}>{operation === "images_to_pdf" ? "Seleccionar imágenes" : "Seleccionar PDF"}</button></div>
         {paths.length > 0 && <ol className="selected-files">{paths.map((path) => <li key={path}><FilePdf /><span>{nameFromPath(path)}</span></li>)}</ol>}
         {operation === "extract" && <div className="field-block"><label htmlFor="pdf-pages">Páginas</label><input id="pdf-pages" value={pageText} onChange={(event) => setPageText(event.target.value)} placeholder="Ejemplo: 1, 3-5, 8" /><small>Separa páginas y rangos con comas.</small></div>}
         {operation === "compress" && <p className="tool-notice">La optimización es sin pérdida: elimina objetos innecesarios y comprime estructuras internas. Las imágenes conservarán su calidad.</p>}
+        {operation === "images_to_pdf" && <p className="tool-notice">El orden seleccionado será el orden de las páginas. Las transparencias se colocan sobre fondo blanco.</p>}
+        {operation === "pdf_to_images" && <p className="tool-notice">Exporta PNG a 150 DPI. Esta función necesita Poppler instalado en el equipo.</p>}
         <div className="panel-footer"><span className="privacy-note">Procesamiento local · Tus documentos no salen del equipo</span><button className="primary-button compact" disabled={processing || !paths.length} onClick={() => void execute()}>{processing ? "Procesando..." : operations.find((item) => item.id === operation)?.label}</button></div>
         {result && <p className="success-message"><CheckCircle weight="fill" /> Guardado en {result}</p>}
         {error && <p className="error-text tool-error">{error}</p>}

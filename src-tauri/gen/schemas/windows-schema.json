@@ -177,16 +177,46 @@
       "description": "Permission identifier",
       "oneOf": [
         {
+          "description": "Permite optimizar PDF localmente con Ghostscript",
+          "type": "string",
+          "const": "allow-advanced-pdf-optimizer",
+          "markdownDescription": "Permite optimizar PDF localmente con Ghostscript"
+        },
+        {
+          "description": "Permite quitar fondos con IA local usando rembg",
+          "type": "string",
+          "const": "allow-ai-background",
+          "markdownDescription": "Permite quitar fondos con IA local usando rembg"
+        },
+        {
           "description": "Permite renombrar los archivos seleccionados",
           "type": "string",
           "const": "allow-batch-renamer",
           "markdownDescription": "Permite renombrar los archivos seleccionados"
         },
         {
+          "description": "Permite convertir Markdown, HTML y texto localmente",
+          "type": "string",
+          "const": "allow-convert-document",
+          "markdownDescription": "Permite convertir Markdown, HTML y texto localmente"
+        },
+        {
+          "description": "Permite verificar dependencias locales de herramientas avanzadas",
+          "type": "string",
+          "const": "allow-dependency-center",
+          "markdownDescription": "Permite verificar dependencias locales de herramientas avanzadas"
+        },
+        {
           "description": "Permite generar códigos QR",
           "type": "string",
           "const": "allow-generate-qr",
           "markdownDescription": "Permite generar códigos QR"
+        },
+        {
+          "description": "Permite comprimir imágenes seleccionadas por lotes",
+          "type": "string",
+          "const": "allow-image-compressor",
+          "markdownDescription": "Permite comprimir imágenes seleccionadas por lotes"
         },
         {
           "description": "Permite convertir imágenes",
@@ -201,10 +231,40 @@
           "markdownDescription": "Permite redimensionar imágenes"
         },
         {
+          "description": "Permite extraer texto localmente de imágenes y PDF seleccionados",
+          "type": "string",
+          "const": "allow-local-ocr",
+          "markdownDescription": "Permite extraer texto localmente de imágenes y PDF seleccionados"
+        },
+        {
+          "description": "Permite transcribir audio o video localmente con Whisper",
+          "type": "string",
+          "const": "allow-local-transcription",
+          "markdownDescription": "Permite transcribir audio o video localmente con Whisper"
+        },
+        {
+          "description": "Permite descargar medios cuando el usuario confirma que tiene permiso",
+          "type": "string",
+          "const": "allow-media-downloader",
+          "markdownDescription": "Permite descargar medios cuando el usuario confirma que tiene permiso"
+        },
+        {
           "description": "Permite procesar documentos PDF seleccionados",
           "type": "string",
           "const": "allow-pdf-tools",
           "markdownDescription": "Permite procesar documentos PDF seleccionados"
+        },
+        {
+          "description": "Permite auditar plugins locales y sus permisos declarados",
+          "type": "string",
+          "const": "allow-plugin-system",
+          "markdownDescription": "Permite auditar plugins locales y sus permisos declarados"
+        },
+        {
+          "description": "Permite leer el archivo de texto seleccionado para compararlo",
+          "type": "string",
+          "const": "allow-read-text-file",
+          "markdownDescription": "Permite leer el archivo de texto seleccionado para compararlo"
         },
         {
           "description": "Permite quitar fondo blanco",

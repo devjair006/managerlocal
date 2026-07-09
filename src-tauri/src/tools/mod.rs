@@ -1,3 +1,4 @@
+pub mod binaries;
 pub mod qr;
 pub mod background;
 pub mod image_converter;
@@ -5,3 +6,13 @@ pub mod image_resizer;
 pub mod pdf_tools;
 pub mod video_converter;
 pub mod batch_renamer;
+pub mod image_compressor;
+pub mod text_diff;
+pub mod document_converter;
+pub mod local_ocr;
+pub mod advanced_pdf_optimizer;
+pub mod local_transcription;
+pub mod plugin_system;
+pub mod media_downloader;
+pub mod ai_background;
+pub mod dependency_center;

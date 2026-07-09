@@ -32,3 +32,53 @@ commands.allow = ["video_converter", "ffmpeg_available"]
 identifier = "allow-batch-renamer"
 description = "Permite renombrar los archivos seleccionados"
 commands.allow = ["batch_renamer"]
+
+[[permission]]
+identifier = "allow-image-compressor"
+description = "Permite comprimir imágenes seleccionadas por lotes"
+commands.allow = ["image_compressor"]
+
+[[permission]]
+identifier = "allow-read-text-file"
+description = "Permite leer el archivo de texto seleccionado para compararlo"
+commands.allow = ["read_text_file"]
+
+[[permission]]
+identifier = "allow-convert-document"
+description = "Permite convertir Markdown, HTML y texto localmente"
+commands.allow = ["convert_document"]
+
+[[permission]]
+identifier = "allow-local-ocr"
+description = "Permite extraer texto localmente de imágenes y PDF seleccionados"
+commands.allow = ["ocr_runtime", "extract_text_ocr"]
+
+[[permission]]
+identifier = "allow-advanced-pdf-optimizer"
+description = "Permite optimizar PDF localmente con Ghostscript"
+commands.allow = ["pdf_optimizer_runtime", "optimize_pdf_advanced"]
+
+[[permission]]
+identifier = "allow-local-transcription"
+description = "Permite transcribir audio o video localmente con Whisper"
+commands.allow = ["transcription_runtime", "transcribe_local_audio"]
+
+[[permission]]
+identifier = "allow-plugin-system"
+description = "Permite auditar plugins locales y sus permisos declarados"
+commands.allow = ["plugin_system_status", "scan_local_plugins"]
+
+[[permission]]
+identifier = "allow-media-downloader"
+description = "Permite descargar medios cuando el usuario confirma que tiene permiso"
+commands.allow = ["media_downloader_runtime", "download_permitted_media"]
+
+[[permission]]
+identifier = "allow-ai-background"
+description = "Permite quitar fondos con IA local usando rembg"
+commands.allow = ["ai_background_runtime", "remove_background_ai"]
+
+[[permission]]
+identifier = "allow-dependency-center"
+description = "Permite verificar dependencias locales de herramientas avanzadas"
+commands.allow = ["dependency_center_status"]

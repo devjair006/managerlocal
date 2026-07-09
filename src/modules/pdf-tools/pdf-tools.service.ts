@@ -1,4 +1,4 @@
-export type PdfOperation = "merge" | "extract" | "compress";
+export type PdfOperation = "merge" | "extract" | "compress" | "images_to_pdf" | "pdf_to_images";
 
 export type PdfToolsInput = {
   operation: PdfOperation;
@@ -17,6 +17,21 @@ export async function pickPdfFiles(multiple: boolean): Promise<string[]> {
   const selected = await open({ multiple, directory: false, filters: [{ name: "Documentos PDF", extensions: ["pdf"] }] });
   if (!selected) return [];
   return Array.isArray(selected) ? selected : [selected];
+}
+
+export async function pickImageFiles(): Promise<string[]> {
+  requireDesktop();
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const selected = await open({ multiple: true, directory: false, filters: [{ name: "Imágenes", extensions: ["png", "jpg", "jpeg", "webp", "bmp", "gif", "tif", "tiff"] }] });
+  if (!selected) return [];
+  return Array.isArray(selected) ? selected : [selected];
+}
+
+export async function pickOutputDirectory(): Promise<string | null> {
+  requireDesktop();
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const selected = await open({ multiple: false, directory: true });
+  return typeof selected === "string" ? selected : null;
 }
 
 export async function pickPdfOutput(defaultName: string): Promise<string | null> {

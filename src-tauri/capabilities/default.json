@@ -17,6 +17,16 @@
     "allow-pdf-tools",
     "allow-video-converter",
     "allow-batch-renamer",
+    "allow-image-compressor",
+    "allow-read-text-file",
+    "allow-convert-document",
+    "allow-local-ocr",
+    "allow-advanced-pdf-optimizer",
+    "allow-local-transcription",
+    "allow-plugin-system",
+    "allow-media-downloader",
+    "allow-ai-background",
+    "allow-dependency-center",
     "dialog:default"
   ]
 }
