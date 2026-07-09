@@ -16,3 +16,5 @@ pub mod plugin_system;
 pub mod media_downloader;
 pub mod ai_background;
 pub mod dependency_center;
+pub mod resource_manager;
+pub mod file_actions;

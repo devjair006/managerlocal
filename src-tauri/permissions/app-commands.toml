@@ -82,3 +82,13 @@ commands.allow = ["ai_background_runtime", "remove_background_ai"]
 identifier = "allow-dependency-center"
 description = "Permite verificar dependencias locales de herramientas avanzadas"
 commands.allow = ["dependency_center_status"]
+
+[[permission]]
+identifier = "allow-resource-manager"
+description = "Permite revisar y abrir carpetas locales de recursos empaquetables"
+commands.allow = ["resource_manager_status", "open_resource_folder"]
+
+[[permission]]
+identifier = "allow-file-actions"
+description = "Permite abrir o revelar archivos generados por la app"
+commands.allow = ["open_path", "reveal_path", "write_text_output"]

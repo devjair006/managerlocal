@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, FilmStrip, MusicNotes, VideoCamera } from "@phosphor-icons/react";
+import { ArrowLeft, FilmStrip, MusicNotes, VideoCamera } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import { ffmpegAvailable, pickMediaFile, pickMediaOutput, videoConverter, type MediaFormat } from "./video-converter.service";
 
 interface Props { onBack: () => void; }
@@ -35,7 +36,7 @@ export function VideoConverter({ onBack }: Props) {
       <button className="media-picker" onClick={() => void choose()}><FilmStrip weight="duotone" /><span><strong>{inputPath ? nameFromPath(inputPath) : "Seleccionar audio o video"}</strong><small>MP4, WebM, MOV, MKV, AVI, MP3, WAV, M4A, OGG o FLAC</small></span></button>
       <div className="format-grid">{formats.map((item) => <button key={item.id} className={format === item.id ? "media-format active" : "media-format"} onClick={() => { setFormat(item.id); setResult(""); }}>{item.kind === "audio" ? <MusicNotes /> : <VideoCamera />}<strong>{item.label}</strong><small>{item.kind}</small></button>)}</div>
       <div className="panel-footer"><span className="privacy-note">Los archivos se procesan localmente</span><button className="primary-button compact" disabled={!inputPath || !available || processing} onClick={() => void convert()}>{processing ? "Convirtiendo..." : `Convertir a ${format.toUpperCase()}`}</button></div>
-      {result && <p className="success-message"><CheckCircle weight="fill" /> Guardado en {result}</p>}{error && <p className="error-text tool-error">{error}</p>}
+      {result && <OutputActions path={result} />}{error && <p className="error-text tool-error">{error}</p>}
     </div>
   </section>;
 }

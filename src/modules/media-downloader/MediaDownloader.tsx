@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, DownloadSimple, FolderOpen, MusicNotes, VideoCamera } from "@phosphor-icons/react";
+import { ArrowLeft, DownloadSimple, FolderOpen, MusicNotes, VideoCamera } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import {
   downloadPermittedMedia,
   getMediaDownloaderRuntime,
@@ -111,7 +112,7 @@ export function MediaDownloader({ onBack }: Props) {
           <button className="primary-button compact" disabled={!canRun} onClick={() => void run()}>{processing ? "Procesando..." : "Descargar"}</button>
         </div>
 
-        {result && <p className="success-message"><CheckCircle weight="fill" /> {result.message} Carpeta: {result.outputDirectory}</p>}
+        {result && <OutputActions path={result.outputDirectory} label={result.message} directory />}
         {error && <p className="error-text tool-error">{error}</p>}
       </div>
     </section>

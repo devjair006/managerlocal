@@ -2,6 +2,8 @@ export type AiBackgroundModel = "default" | "u2net" | "u2net_human_seg" | "isnet
 
 export type AiBackgroundRuntime = {
   rembg: boolean;
+  executable: string | null;
+  modelsDirectory: string;
 };
 
 function requireDesktop() {

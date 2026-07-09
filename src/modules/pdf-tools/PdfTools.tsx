@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, CheckCircle, FilePdf, Files, Images, Scissors, Stack } from "@phosphor-icons/react";
+import { ArrowLeft, FilePdf, Files, Images, Scissors, Stack } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import { pdfTools, pickImageFiles, pickOutputDirectory, pickPdfFiles, pickPdfOutput, type PdfOperation } from "./pdf-tools.service";
 
 interface Props { onBack: () => void; }
@@ -69,7 +70,7 @@ export function PdfTools({ onBack }: Props) {
         {operation === "images_to_pdf" && <p className="tool-notice">El orden seleccionado será el orden de las páginas. Las transparencias se colocan sobre fondo blanco.</p>}
         {operation === "pdf_to_images" && <p className="tool-notice">Exporta PNG a 150 DPI. Esta función necesita Poppler instalado en el equipo.</p>}
         <div className="panel-footer"><span className="privacy-note">Procesamiento local · Tus documentos no salen del equipo</span><button className="primary-button compact" disabled={processing || !paths.length} onClick={() => void execute()}>{processing ? "Procesando..." : operations.find((item) => item.id === operation)?.label}</button></div>
-        {result && <p className="success-message"><CheckCircle weight="fill" /> Guardado en {result}</p>}
+        {result && <OutputActions path={result} directory={operation === "pdf_to_images"} />}
         {error && <p className="error-text tool-error">{error}</p>}
       </div>
     </section>

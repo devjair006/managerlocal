@@ -1,6 +1,14 @@
+export type WhisperModelInfo = {
+  name: string;
+  path: string;
+  sizeBytes: number;
+};
+
 export type TranscriptionRuntime = {
   whisper: boolean;
   executable: string | null;
+  bundledModels: WhisperModelInfo[];
+  modelsDirectory: string | null;
 };
 
 export type TranscriptionInput = {

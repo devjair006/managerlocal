@@ -29,6 +29,11 @@ pub fn run() {
             tools::ai_background::ai_background_runtime,
             tools::ai_background::remove_background_ai,
             tools::dependency_center::dependency_center_status,
+            tools::resource_manager::resource_manager_status,
+            tools::resource_manager::open_resource_folder,
+            tools::file_actions::open_path,
+            tools::file_actions::reveal_path,
+            tools::file_actions::write_text_output,
         ])
         .run(tauri::generate_context!())
         .expect("error al ejecutar Manager Local");

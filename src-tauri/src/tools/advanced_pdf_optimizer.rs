@@ -9,6 +9,7 @@ use super::binaries;
 #[serde(rename_all = "camelCase")]
 pub struct PdfOptimizerRuntime {
     ghostscript: bool,
+    mutool: bool,
     executable: Option<String>,
 }
 
@@ -29,16 +30,21 @@ pub struct AdvancedPdfOptimizerResult {
     saved_bytes: u64,
     saved_percent: f64,
     profile: String,
+    engine: String,
 }
 
-const CANDIDATES: &[&str] = if cfg!(target_os = "windows") {
+const GHOSTSCRIPT_CANDIDATES: &[&str] = if cfg!(target_os = "windows") {
     &["gswin64c", "gswin32c", "gs"]
 } else {
     &["gs"]
 };
 
 fn ghostscript_executable() -> Option<String> {
-    binaries::probe(CANDIDATES, &["--version"]).1
+    binaries::probe(GHOSTSCRIPT_CANDIDATES, &["--version"]).1
+}
+
+fn mutool_executable() -> Option<String> {
+    binaries::probe(&["mutool"], &["clean"]).1
 }
 
 fn validate_profile(profile: &str) -> Result<&'static str, String> {
@@ -76,32 +82,49 @@ fn validate_paths(input_path: &str, output_path: &str) -> Result<(), String> {
 
 #[tauri::command]
 pub fn pdf_optimizer_runtime() -> PdfOptimizerRuntime {
-    let executable = ghostscript_executable();
-    PdfOptimizerRuntime { ghostscript: executable.is_some(), executable }
+    let ghostscript = ghostscript_executable();
+    let mutool = mutool_executable();
+    PdfOptimizerRuntime {
+        ghostscript: ghostscript.is_some(),
+        mutool: mutool.is_some(),
+        executable: ghostscript.or(mutool),
+    }
 }
 
 #[tauri::command]
 pub fn optimize_pdf_advanced(input: AdvancedPdfOptimizerInput) -> Result<AdvancedPdfOptimizerResult, String> {
     validate_paths(&input.input_path, &input.output_path)?;
     let pdf_settings = validate_profile(&input.profile)?;
-    let executable = ghostscript_executable().ok_or("Falta Ghostscript. Instálalo o empaquétalo como sidecar para usar esta herramienta.")?;
     let original_bytes = fs::metadata(&input.input_path).map_err(|error| error.to_string())?.len();
 
-    let output = binaries::command(&executable)
-        .arg("-sDEVICE=pdfwrite")
-        .arg("-dCompatibilityLevel=1.4")
-        .arg(format!("-dPDFSETTINGS={pdf_settings}"))
-        .arg("-dNOPAUSE")
-        .arg("-dQUIET")
-        .arg("-dBATCH")
-        .arg(format!("-sOutputFile={}", input.output_path))
-        .arg(&input.input_path)
-        .output()
-        .map_err(|error| format!("No se pudo ejecutar Ghostscript: {error}"))?;
+    let (output, engine) = if let Some(executable) = ghostscript_executable() {
+        let output = binaries::command(&executable)
+            .arg("-sDEVICE=pdfwrite")
+            .arg("-dCompatibilityLevel=1.4")
+            .arg(format!("-dPDFSETTINGS={pdf_settings}"))
+            .arg("-dNOPAUSE")
+            .arg("-dQUIET")
+            .arg("-dBATCH")
+            .arg(format!("-sOutputFile={}", input.output_path))
+            .arg(&input.input_path)
+            .output()
+            .map_err(|error| format!("No se pudo ejecutar Ghostscript: {error}"))?;
+        (output, "Ghostscript".to_string())
+    } else if let Some(executable) = mutool_executable() {
+        let output = binaries::command(&executable)
+            .args(["clean", "-gggg", "-z", "-f", "-i", "-c"])
+            .arg(&input.input_path)
+            .arg(&input.output_path)
+            .output()
+            .map_err(|error| format!("No se pudo ejecutar MuPDF/mutool: {error}"))?;
+        (output, "MuPDF/mutool".to_string())
+    } else {
+        return Err("Falta Ghostscript o MuPDF/mutool. Instala uno o empaquétalo como sidecar para usar esta herramienta.".into());
+    };
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        return Err(if stderr.is_empty() { "Ghostscript no pudo optimizar el PDF".into() } else { stderr });
+        return Err(if stderr.is_empty() { format!("{engine} no pudo optimizar el PDF") } else { stderr });
     }
 
     let optimized_bytes = fs::metadata(&input.output_path).map_err(|error| error.to_string())?.len();
@@ -115,5 +138,6 @@ pub fn optimize_pdf_advanced(input: AdvancedPdfOptimizerInput) -> Result<Advance
         saved_bytes,
         saved_percent,
         profile: input.profile,
+        engine,
     })
 }

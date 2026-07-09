@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, CheckCircle, ImageSquare, MagicWand, Sparkle } from "@phosphor-icons/react";
+import { ArrowLeft, ClipboardText, ImageSquare, MagicWand, Sparkle } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import {
   getAiBackgroundRuntime,
   imageSrc,
@@ -33,11 +34,19 @@ export function AiBackgroundRemover({ onBack }: Props) {
   const [model, setModel] = useState<AiBackgroundModel>("default");
   const [alphaMatting, setAlphaMatting] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    void getAiBackgroundRuntime().then(setRuntime).catch((cause) => setError(cause instanceof Error ? cause.message : String(cause)));
-  }, []);
+  async function refreshRuntime() {
+    try {
+      setRuntime(await getAiBackgroundRuntime());
+      setError("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    }
+  }
+
+  useEffect(() => { void refreshRuntime(); }, []);
 
   async function chooseInput() {
     try {
@@ -52,6 +61,13 @@ export function AiBackgroundRemover({ onBack }: Props) {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
+  }
+
+  async function copyExecutable() {
+    if (!runtime?.executable) return;
+    await navigator.clipboard.writeText(runtime.executable);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
   }
 
   async function run() {
@@ -82,7 +98,7 @@ export function AiBackgroundRemover({ onBack }: Props) {
         <div><p className="eyebrow">Imágenes</p><h1>Quitar fondo con IA local</h1><p>Separa sujeto y fondo usando rembg sin subir imágenes a internet.</p></div>
       </div>
 
-      <div className="runtime-status"><span className={runtime?.rembg ? "runtime-dot ready" : "runtime-dot"} /> rembg {runtime?.rembg ? "disponible" : "no encontrado"}</div>
+      <div className="runtime-status"><span className={runtime?.rembg ? "runtime-dot ready" : "runtime-dot"} /> rembg {runtime?.rembg ? `disponible (${runtime.executable})` : "no encontrado"}</div>
 
       <div className="file-tool-panel">
         <button className="media-picker" onClick={() => void chooseInput()}>
@@ -104,7 +120,13 @@ export function AiBackgroundRemover({ onBack }: Props) {
           Refinar bordes con alpha matting. Tarda más, pero suele mejorar pelo, productos y bordes suaves.
         </label>
 
-        {!runtime?.rembg && <p className="tool-notice">Falta rembg. En desarrollo puedes instalarlo con: <code>pip install "rembg[cli]"</code>. La primera ejecución puede descargar modelos locales.</p>}
+        <div className="dependency-actions transcription-actions">
+          <button onClick={() => void refreshRuntime()}>Revisar rembg</button>
+          {runtime?.executable && <button onClick={() => void copyExecutable()}><ClipboardText /> {copied ? "Copiado" : "Copiar ruta"}</button>}
+          {runtime?.modelsDirectory && <button onClick={() => void navigator.clipboard.writeText(runtime.modelsDirectory)}>Copiar carpeta de modelos</button>}
+        </div>
+
+        {!runtime?.rembg && <p className="tool-notice">Falta rembg. Instálalo de forma aislada con: <code>powershell -ExecutionPolicy Bypass -File scripts\install-rembg.ps1 -InstallPython</code>. La primera ejecución descargará el modelo elegido localmente.</p>}
 
         {(inputPreview || outputPreview) && (
           <div className="image-comparison">
@@ -118,7 +140,7 @@ export function AiBackgroundRemover({ onBack }: Props) {
           <button className="primary-button compact" disabled={!inputPath || processing || !runtime?.rembg} onClick={() => void run()}>{processing ? "Recortando..." : "Quitar fondo con IA"}</button>
         </div>
 
-        {outputPath && <p className="success-message"><CheckCircle weight="fill" /> Guardado en {outputPath}</p>}
+        {outputPath && <OutputActions path={outputPath} />}
         {error && <p className="error-text tool-error">{error}</p>}
       </div>
     </section>

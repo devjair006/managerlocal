@@ -27,6 +27,8 @@
     "allow-media-downloader",
     "allow-ai-background",
     "allow-dependency-center",
+    "allow-resource-manager",
+    "allow-file-actions",
     "dialog:default"
   ]
 }

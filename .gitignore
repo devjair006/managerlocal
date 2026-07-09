@@ -3,3 +3,5 @@ dist/
 src-tauri/target/
 .prototype-bootstrap/
 *.log
+src-tauri/binaries/*
+!src-tauri/binaries/.gitkeep

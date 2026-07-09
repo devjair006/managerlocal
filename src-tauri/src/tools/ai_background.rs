@@ -8,7 +8,9 @@ use super::binaries;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiBackgroundRuntime {
-    rembg: bool,
+    pub rembg: bool,
+    pub executable: Option<String>,
+    pub models_directory: String,
 }
 
 #[derive(Deserialize)]
@@ -20,8 +22,32 @@ pub struct AiBackgroundInput {
     alpha_matting: bool,
 }
 
-fn rembg_available() -> bool {
-    binaries::probe(&["rembg"], &["--help"]).0
+fn rembg_models_directory() -> std::path::PathBuf {
+    binaries::user_binaries_directory().join("rembg-models")
+}
+
+fn managed_rembg_executable() -> Option<String> {
+    let executable = binaries::user_binaries_directory()
+        .join("rembg-env")
+        .join("Scripts")
+        .join("rembg.exe");
+    if !executable.is_file() {
+        return None;
+    }
+
+    let output = binaries::command(executable.to_string_lossy().as_ref())
+        .arg("--help")
+        .output()
+        .ok()?;
+    if output.status.success() {
+        Some(executable.to_string_lossy().into_owned())
+    } else {
+        None
+    }
+}
+
+fn rembg_executable() -> Option<String> {
+    managed_rembg_executable().or_else(|| binaries::probe(&["rembg"], &["--help"]).1)
 }
 
 fn validate_model(model: &str) -> Result<Option<&str>, String> {
@@ -43,11 +69,17 @@ fn validate_paths(input_path: &str, output_path: &str) -> Result<(), String> {
         return Err("Selecciona una ruta de salida".into());
     }
     let lower = input_path.to_lowercase();
-    let valid_input = [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"].iter().any(|extension| lower.ends_with(extension));
+    let valid_input = [".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"]
+        .iter()
+        .any(|extension| lower.ends_with(extension));
     if !valid_input || !Path::new(input_path).is_file() {
         return Err("La entrada debe ser una imagen válida".into());
     }
-    if fs::metadata(input_path).map_err(|error| error.to_string())?.len() > 50 * 1024 * 1024 {
+    if fs::metadata(input_path)
+        .map_err(|error| error.to_string())?
+        .len()
+        > 50 * 1024 * 1024
+    {
         return Err("La imagen no puede superar 50 MB".into());
     }
     if !output_path.to_lowercase().ends_with(".png") {
@@ -64,18 +96,28 @@ fn validate_paths(input_path: &str, output_path: &str) -> Result<(), String> {
 
 #[tauri::command]
 pub fn ai_background_runtime() -> AiBackgroundRuntime {
-    AiBackgroundRuntime { rembg: rembg_available() }
+    let executable = rembg_executable();
+    AiBackgroundRuntime {
+        rembg: executable.is_some(),
+        executable,
+        models_directory: rembg_models_directory().to_string_lossy().into_owned(),
+    }
 }
 
 #[tauri::command]
 pub fn remove_background_ai(input: AiBackgroundInput) -> Result<String, String> {
     validate_paths(&input.input_path, &input.output_path)?;
     let model = validate_model(&input.model)?;
-    if !rembg_available() {
+    if rembg_executable().is_none() {
         return Err("Falta rembg. Instálalo o empaquétalo como sidecar para usar IA local.".into());
     }
 
-    let mut command = binaries::candidate_command(&["rembg"]);
+    let executable = rembg_executable()
+        .ok_or("Falta rembg. Instálalo o empaquétalo como sidecar para usar IA local.")?;
+    fs::create_dir_all(rembg_models_directory())
+        .map_err(|error| format!("No se pudo preparar la carpeta de modelos: {error}"))?;
+    let mut command = binaries::command(&executable);
+    command.env("U2NET_HOME", rembg_models_directory());
     command.arg("i");
     if input.alpha_matting {
         command.arg("-a");
@@ -83,12 +125,19 @@ pub fn remove_background_ai(input: AiBackgroundInput) -> Result<String, String> 
     if let Some(model) = model {
         command.args(["-m", model]);
     }
-    let output = command.arg(&input.input_path).arg(&input.output_path).output()
+    let output = command
+        .arg(&input.input_path)
+        .arg(&input.output_path)
+        .output()
         .map_err(|error| format!("No se pudo ejecutar rembg: {error}"))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        return Err(if stderr.is_empty() { "rembg no pudo quitar el fondo".into() } else { stderr });
+        return Err(if stderr.is_empty() {
+            "rembg no pudo quitar el fondo".into()
+        } else {
+            stderr
+        });
     }
     if !Path::new(&input.output_path).is_file() {
         return Err("rembg terminó sin crear el archivo de salida".into());

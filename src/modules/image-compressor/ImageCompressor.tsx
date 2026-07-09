@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, FileImage, FolderOpen, Gauge, Images } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import { compressImages, pickCompressionFolder, pickImagesToCompress, type CompressionResult } from "./image-compressor.service";
 
 interface Props { onBack: () => void; }
@@ -59,6 +60,7 @@ export function ImageCompressor({ onBack }: Props) {
       <p className="tool-notice">La salida se guarda como JPG. Las zonas transparentes se colocan sobre fondo blanco.</p>
       <div className="panel-footer"><span className="privacy-note">Todo se procesa localmente con Rust</span><button className="primary-button compact" disabled={!paths.length || !outputDirectory || processing} onClick={() => void compress()}>{processing ? "Comprimiendo..." : "Comprimir lote"}</button></div>
       {results.length > 0 && <div className="compression-results">
+        <OutputActions path={outputDirectory} label="Lote guardado en" directory />
         <div className="compression-summary"><span><CheckCircle weight="fill" /> {results.length} procesadas</span><strong>{formatBytes(totals.before)} → {formatBytes(totals.after)}</strong><em>{Math.max(0, Math.round((1 - totals.after / totals.before) * 100))}% menos</em></div>
         <div className="compression-table"><div><strong>Archivo</strong><strong>Antes</strong><strong>Después</strong><strong>Ahorro</strong></div>{results.map((item) => <div key={item.outputPath}><span title={item.outputPath}>{item.fileName}</span><span>{formatBytes(item.originalBytes)}</span><span>{formatBytes(item.compressedBytes)}</span><span className={savingPercent(item) > 0 ? "positive-saving" : "negative-saving"}>{savingPercent(item)}%</span></div>)}</div>
       </div>}

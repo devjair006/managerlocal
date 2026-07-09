@@ -77,6 +77,44 @@ pub fn probe(candidates: &[&str], version_args: &[&str]) -> (bool, Option<String
     (false, None, None)
 }
 
+pub fn data_directory(name: &str) -> Option<PathBuf> {
+    search_directories()
+        .into_iter()
+        .map(|directory| directory.join(name))
+        .find(|directory| directory.is_dir())
+}
+
+pub fn user_binaries_directory() -> PathBuf {
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(local_app_data) = env::var("LOCALAPPDATA") {
+            return PathBuf::from(local_app_data).join("Manager Local").join("binaries");
+        }
+        if let Ok(app_data) = env::var("APPDATA") {
+            return PathBuf::from(app_data).join("Manager Local").join("binaries");
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        if let Ok(home) = env::var("HOME") {
+            return PathBuf::from(home).join("Library").join("Application Support").join("Manager Local").join("binaries");
+        }
+    }
+
+    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+    {
+        if let Ok(data_home) = env::var("XDG_DATA_HOME") {
+            return PathBuf::from(data_home).join("manager-local").join("binaries");
+        }
+        if let Ok(home) = env::var("HOME") {
+            return PathBuf::from(home).join(".local").join("share").join("manager-local").join("binaries");
+        }
+    }
+
+    PathBuf::from("manager-local-binaries")
+}
+
 fn is_executable_file(path: &Path) -> bool {
     path.is_file()
 }
@@ -87,6 +125,8 @@ fn search_directories() -> Vec<PathBuf> {
     if let Ok(value) = env::var("MANAGERLOCAL_BIN_DIR") {
         directories.push(PathBuf::from(value));
     }
+
+    directories.push(user_binaries_directory());
 
     if let Ok(exe) = env::current_exe() {
         if let Some(parent) = exe.parent() {

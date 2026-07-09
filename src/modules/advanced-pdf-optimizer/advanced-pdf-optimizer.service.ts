@@ -2,6 +2,7 @@ export type PdfOptimizationProfile = "screen" | "ebook" | "printer" | "prepress"
 
 export type PdfOptimizerRuntime = {
   ghostscript: boolean;
+  mutool: boolean;
   executable: string | null;
 };
 
@@ -12,6 +13,7 @@ export type PdfOptimizationResult = {
   savedBytes: number;
   savedPercent: number;
   profile: PdfOptimizationProfile;
+  engine: string;
 };
 
 function requireDesktop() {

@@ -32,7 +32,11 @@ pub fn ocr_runtime() -> OcrRuntime {
 }
 
 fn recognize_image(path: &Path, language: &str) -> Result<String, String> {
-    let output = binaries::candidate_command(&["tesseract"])
+    let mut command = binaries::candidate_command(&["tesseract"]);
+    if let Some(tessdata) = binaries::data_directory("tessdata") {
+        command.env("TESSDATA_PREFIX", tessdata);
+    }
+    let output = command
         .arg(path)
         .arg("stdout")
         .args(["-l", language, "--psm", "3"])

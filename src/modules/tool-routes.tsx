@@ -17,10 +17,12 @@ import { PluginManager } from "./plugin-manager/PluginManager";
 import { MediaDownloader } from "./media-downloader/MediaDownloader";
 import { AiBackgroundRemover } from "./ai-background-remover/AiBackgroundRemover";
 import { DependencyCenter } from "./dependency-center/DependencyCenter";
+import { PasswordGenerator } from "./password-generator/PasswordGenerator";
 
 export type ToolViewProps = { onBack: () => void };
 
 export const toolViews: Record<string, ComponentType<ToolViewProps>> = {
+  "password-generator": PasswordGenerator,
   "qr-generator": QrGenerator,
   "background-remover": BackgroundRemover,
   "ai-background-remover": AiBackgroundRemover,

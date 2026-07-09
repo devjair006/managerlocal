@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle, FilePdf, Gauge } from "@phosphor-icons/react";
+import { ArrowLeft, FilePdf, Gauge } from "@phosphor-icons/react";
+import { OutputActions } from "../../components/OutputActions";
 import {
   getPdfOptimizerRuntime,
   optimizePdfAdvanced,
@@ -13,11 +14,11 @@ import {
 interface Props { onBack: () => void; }
 
 const profiles: { id: PdfOptimizationProfile; label: string; description: string }[] = [
-  { id: "screen", label: "Máxima compresión", description: "Archivos pequeños para compartir. Puede bajar bastante la calidad visual." },
-  { id: "ebook", label: "Lectura equilibrada", description: "Buen balance para documentos, apuntes y PDFs de uso diario." },
-  { id: "printer", label: "Impresión", description: "Conserva más detalle, pesa más, útil si vas a imprimir." },
-  { id: "prepress", label: "Preprensa", description: "Alta calidad para trabajos gráficos. Reducción menor." },
-  { id: "default", label: "Automático", description: "Perfil estándar de Ghostscript." },
+  { id: "screen", label: "Máxima compresión", description: "Prioriza archivos pequeños cuando Ghostscript está disponible." },
+  { id: "ebook", label: "Lectura equilibrada", description: "Buen balance para documentos, apuntes y uso diario." },
+  { id: "printer", label: "Impresión", description: "Conserva más detalle para impresión." },
+  { id: "prepress", label: "Preprensa", description: "Alta calidad para trabajos gráficos." },
+  { id: "default", label: "Automático", description: "Perfil estándar del motor disponible." },
 ];
 
 function fileName(path: string) {
@@ -49,6 +50,8 @@ export function AdvancedPdfOptimizer({ onBack }: Props) {
   }, []);
 
   const selectedProfile = useMemo(() => profiles.find((item) => item.id === profile), [profile]);
+  const hasEngine = Boolean(runtime?.ghostscript || runtime?.mutool);
+  const engineLabel = runtime?.ghostscript ? `Ghostscript disponible (${runtime.executable})` : runtime?.mutool ? `MuPDF/mutool disponible (${runtime.executable})` : "no encontrado";
 
   async function chooseInput() {
     try {
@@ -89,13 +92,13 @@ export function AdvancedPdfOptimizer({ onBack }: Props) {
         <div>
           <p className="eyebrow">PDF</p>
           <h1>Optimizador PDF avanzado</h1>
-          <p>Reduce PDFs con perfiles de Ghostscript para compartir, leer o imprimir.</p>
+          <p>Reduce PDFs usando Ghostscript o MuPDF/mutool de forma local.</p>
         </div>
       </div>
 
       <div className="runtime-status">
-        <span className={runtime?.ghostscript ? "runtime-dot ready" : "runtime-dot"} />
-        Ghostscript {runtime?.ghostscript ? `disponible (${runtime.executable})` : "no encontrado"}
+        <span className={hasEngine ? "runtime-dot ready" : "runtime-dot"} />
+        Motor PDF {engineLabel}
       </div>
 
       <div className="file-tool-panel">
@@ -117,26 +120,23 @@ export function AdvancedPdfOptimizer({ onBack }: Props) {
         </div>
 
         <p className="tool-notice">
-          Perfil actual: <strong>{selectedProfile?.label}</strong>. Esto sí puede recomprimir imágenes internas del PDF, por eso es diferente al optimizador sin pérdida.
+          Perfil actual: <strong>{selectedProfile?.label}</strong>. Ghostscript aplica perfiles de calidad; MuPDF/mutool limpia, compacta y recomprime estructuras.
         </p>
 
-        {!runtime?.ghostscript && (
-          <p className="tool-notice">
-            Falta Ghostscript. En desarrollo puedes instalarlo con: <code>winget install ArtifexSoftware.Ghostscript</code>. Después reinicia Cursor y ejecuta <code>npm run tauri dev</code>.
-          </p>
-        )}
+        {!hasEngine && <p className="tool-notice">Falta Ghostscript o MuPDF/mutool. Instala uno de los dos o empaquétalo como sidecar.</p>}
 
         <div className="panel-footer">
           <span className="privacy-note">Procesamiento local · sin subir documentos</span>
-          <button className="primary-button compact" disabled={!inputPath || processing || !runtime?.ghostscript} onClick={() => void run()}>
+          <button className="primary-button compact" disabled={!inputPath || processing || !hasEngine} onClick={() => void run()}>
             {processing ? "Optimizando..." : "Optimizar PDF"}
           </button>
         </div>
 
         {result && (
           <div className="conversion-result">
-            <p className="success-message"><CheckCircle weight="fill" /> Guardado en {result.outputPath}</p>
+            <OutputActions path={result.outputPath} />
             <div className="result-grid">
+              <span><strong>Motor</strong>{result.engine}</span>
               <span><strong>Antes</strong>{formatBytes(result.originalBytes)}</span>
               <span><strong>Después</strong>{formatBytes(result.optimizedBytes)}</span>
               <span><strong>Ahorro</strong>{formatBytes(result.savedBytes)} · {result.savedPercent.toFixed(1)}%</span>

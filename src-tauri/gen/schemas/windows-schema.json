@@ -207,6 +207,12 @@
           "markdownDescription": "Permite verificar dependencias locales de herramientas avanzadas"
         },
         {
+          "description": "Permite abrir o revelar archivos generados por la app",
+          "type": "string",
+          "const": "allow-file-actions",
+          "markdownDescription": "Permite abrir o revelar archivos generados por la app"
+        },
+        {
           "description": "Permite generar códigos QR",
           "type": "string",
           "const": "allow-generate-qr",
@@ -271,6 +277,12 @@
           "type": "string",
           "const": "allow-remove-white-background",
           "markdownDescription": "Permite quitar fondo blanco"
+        },
+        {
+          "description": "Permite revisar y abrir carpetas locales de recursos empaquetables",
+          "type": "string",
+          "const": "allow-resource-manager",
+          "markdownDescription": "Permite revisar y abrir carpetas locales de recursos empaquetables"
         },
         {
           "description": "Permite convertir audio y video con FFmpeg",

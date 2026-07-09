@@ -40,6 +40,21 @@ fn dependency(
     }
 }
 
+fn rembg_dependency() -> DependencyStatus {
+    let runtime = super::ai_background::ai_background_runtime();
+    DependencyStatus {
+        id: "rembg".into(),
+        name: "rembg".into(),
+        available: runtime.rembg,
+        executable: runtime.executable,
+        version: None,
+        used_by: vec!["Quitar fondo IA".into()],
+        install_hint: "powershell -ExecutionPolicy Bypass -File scripts\\install-rembg.ps1 -InstallPython".into(),
+        packaging_hint: "Instala rembg en el entorno aislado de Manager Local; sus modelos se guardan en la carpeta privada de la app.".into(),
+        required_for: "Eliminar fondos complejos usando IA local.".into(),
+    }
+}
+
 #[tauri::command]
 pub fn dependency_center_status() -> Vec<DependencyStatus> {
     vec![
@@ -69,7 +84,7 @@ pub fn dependency_center_status() -> Vec<DependencyStatus> {
             &["pdftoppm"],
             &["-v"],
             &["PDF a imágenes", "OCR local para PDF"],
-            "Instala Poppler y agrega la carpeta bin al PATH.",
+            "winget install oschwartz10612.Poppler",
             "Empaquetar pdftoppm y DLLs necesarias como recurso/sidecar.",
             "Renderizar páginas PDF como imágenes.",
         ),
@@ -79,24 +94,48 @@ pub fn dependency_center_status() -> Vec<DependencyStatus> {
             &["tesseract"],
             &["--version"],
             &["OCR local"],
-            "winget install UB-Mannheim.TesseractOCR",
+            "winget install tesseract-ocr.tesseract",
             "Empaquetar Tesseract y datos de idioma spa/eng respetando licencias.",
             "Extraer texto de capturas, imágenes y documentos escaneados.",
         ),
         dependency(
             "ghostscript",
             "Ghostscript",
-            if cfg!(target_os = "windows") { &["gswin64c", "gswin32c", "gs"] } else { &["gs"] },
+            if cfg!(target_os = "windows") {
+                &["gswin64c", "gswin32c", "gs"]
+            } else {
+                &["gs"]
+            },
             &["--version"],
             &["Optimizar PDF avanzado"],
-            "winget install ArtifexSoftware.Ghostscript",
+            "Instalar Ghostscript desde Artifex si se necesita compresión con perfiles de calidad.",
             "Empaquetar binarios/licencias o pedir instalación externa según distribución.",
             "Recomprimir PDFs con perfiles de calidad/tamaño.",
         ),
         dependency(
+            "mutool",
+            "MuPDF / mutool",
+            &["mutool"],
+            &["clean"],
+            &["Optimizar PDF avanzado"],
+            "winget install ArtifexSoftware.mutool",
+            "Empaquetar mutool como sidecar para limpieza y compresión PDF.",
+            "Optimizar PDFs cuando Ghostscript no está disponible.",
+        ),
+        dependency(
             "whisper",
             "Whisper / whisper.cpp",
-            if cfg!(target_os = "windows") { &["whisper-cli.exe", "whisper-cli", "main.exe", "whisper.exe", "whisper"] } else { &["whisper-cli", "main", "whisper"] },
+            if cfg!(target_os = "windows") {
+                &[
+                    "whisper-cli.exe",
+                    "whisper-cli",
+                    "main.exe",
+                    "whisper.exe",
+                    "whisper",
+                ]
+            } else {
+                &["whisper-cli", "main", "whisper"]
+            },
             &["--help"],
             &["Transcripción local"],
             "Instala whisper.cpp y descarga un modelo ggml .bin compatible.",
@@ -113,15 +152,6 @@ pub fn dependency_center_status() -> Vec<DependencyStatus> {
             "Empaquetar yt-dlp como sidecar y mantenerlo actualizable.",
             "Descargar medios donde tengas permiso y el sitio lo permita.",
         ),
-        dependency(
-            "rembg",
-            "rembg",
-            &["rembg"],
-            &["--help"],
-            &["Quitar fondo IA"],
-            "pip install \"rembg[cli]\"",
-            "Empaquetar runtime Python/modelos o migrar a ONNX Runtime integrado.",
-            "Eliminar fondos complejos usando IA local.",
-        ),
+        rembg_dependency(),
     ]
 }
