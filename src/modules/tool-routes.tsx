@@ -1,44 +1,37 @@
-import type { ComponentType } from "react";
-import { QrGenerator } from "./qr-generator/QrGenerator";
-import { BackgroundRemover } from "./background-remover/BackgroundRemover";
-import { ImageConverter } from "./image-converter/ImageConverter";
-import { ImageResizer } from "./image-resizer/ImageResizer";
-import { PdfTools } from "./pdf-tools/PdfTools";
-import { VideoConverter } from "./video-converter/VideoConverter";
-import { BatchRenamer } from "./batch-renamer/BatchRenamer";
-import { ImageCompressor } from "./image-compressor/ImageCompressor";
-import { TextDiff } from "./text-diff/TextDiff";
-import { DocumentConverter } from "./document-converter/DocumentConverter";
-import { UnitConverter } from "./unit-converter/UnitConverter";
-import { LocalOcr } from "./local-ocr/LocalOcr";
-import { AdvancedPdfOptimizer } from "./advanced-pdf-optimizer/AdvancedPdfOptimizer";
-import { LocalTranscription } from "./local-transcription/LocalTranscription";
-import { PluginManager } from "./plugin-manager/PluginManager";
-import { MediaDownloader } from "./media-downloader/MediaDownloader";
-import { AiBackgroundRemover } from "./ai-background-remover/AiBackgroundRemover";
-import { DependencyCenter } from "./dependency-center/DependencyCenter";
-import { PasswordGenerator } from "./password-generator/PasswordGenerator";
+import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
 export type ToolViewProps = { onBack: () => void };
 
-export const toolViews: Record<string, ComponentType<ToolViewProps>> = {
-  "password-generator": PasswordGenerator,
-  "qr-generator": QrGenerator,
-  "background-remover": BackgroundRemover,
-  "ai-background-remover": AiBackgroundRemover,
-  "image-converter": ImageConverter,
-  "image-resizer": ImageResizer,
-  "pdf-tools": PdfTools,
-  "advanced-pdf-optimizer": AdvancedPdfOptimizer,
-  "video-converter": VideoConverter,
-  "media-downloader": MediaDownloader,
-  "local-transcription": LocalTranscription,
-  "batch-renamer": BatchRenamer,
-  "image-compressor": ImageCompressor,
-  "text-diff": TextDiff,
-  "document-converter": DocumentConverter,
-  "unit-converter": UnitConverter,
-  "local-ocr": LocalOcr,
-  "plugin-manager": PluginManager,
-  "dependency-center": DependencyCenter,
-};
+const loaders = {
+  "password-generator": () => import("./password-generator/PasswordGenerator").then((module) => ({ default: module.PasswordGenerator })),
+  "qr-generator": () => import("./qr-generator/QrGenerator").then((module) => ({ default: module.QrGenerator })),
+  "background-remover": () => import("./background-remover/BackgroundRemover").then((module) => ({ default: module.BackgroundRemover })),
+  "ai-background-remover": () => import("./ai-background-remover/AiBackgroundRemover").then((module) => ({ default: module.AiBackgroundRemover })),
+  "image-converter": () => import("./image-converter/ImageConverter").then((module) => ({ default: module.ImageConverter })),
+  "image-resizer": () => import("./image-resizer/ImageResizer").then((module) => ({ default: module.ImageResizer })),
+  "pdf-tools": () => import("./pdf-tools/PdfTools").then((module) => ({ default: module.PdfTools })),
+  "advanced-pdf-optimizer": () => import("./advanced-pdf-optimizer/AdvancedPdfOptimizer").then((module) => ({ default: module.AdvancedPdfOptimizer })),
+  "video-converter": () => import("./video-converter/VideoConverter").then((module) => ({ default: module.VideoConverter })),
+  "media-downloader": () => import("./media-downloader/MediaDownloader").then((module) => ({ default: module.MediaDownloader })),
+  "local-transcription": () => import("./local-transcription/LocalTranscription").then((module) => ({ default: module.LocalTranscription })),
+  "batch-renamer": () => import("./batch-renamer/BatchRenamer").then((module) => ({ default: module.BatchRenamer })),
+  "image-compressor": () => import("./image-compressor/ImageCompressor").then((module) => ({ default: module.ImageCompressor })),
+  "text-diff": () => import("./text-diff/TextDiff").then((module) => ({ default: module.TextDiff })),
+  "document-converter": () => import("./document-converter/DocumentConverter").then((module) => ({ default: module.DocumentConverter })),
+  "unit-converter": () => import("./unit-converter/UnitConverter").then((module) => ({ default: module.UnitConverter })),
+  "local-ocr": () => import("./local-ocr/LocalOcr").then((module) => ({ default: module.LocalOcr })),
+  "plugin-manager": () => import("./plugin-manager/PluginManager").then((module) => ({ default: module.PluginManager })),
+  "dependency-center": () => import("./dependency-center/DependencyCenter").then((module) => ({ default: module.DependencyCenter })),
+} satisfies Record<string, () => Promise<{ default: ComponentType<ToolViewProps> }>>;
+
+export type ToolId = keyof typeof loaders;
+
+type ToolViewComponent = ComponentType<ToolViewProps>;
+
+export const lazyToolViews = Object.fromEntries(
+  (Object.keys(loaders) as ToolId[]).map((id) => [id, lazy(loaders[id])]),
+) as Record<ToolId, LazyExoticComponent<ToolViewComponent>>;
+
+export function hasToolView(id: string): id is ToolId {
+  return id in loaders;
+}

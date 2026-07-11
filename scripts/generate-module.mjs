@@ -134,22 +134,12 @@ function upsertRegistryEntry(registrySource, entry, icon) {
 }
 
 function addToolRoute(routesSource, id, componentName) {
-  const importLine = `import { ${componentName} } from "./${id}/${componentName}";`;
-  let next = routesSource;
+  const loaderLine = `  "${id}": () => import("./${id}/${componentName}").then((module) => ({ default: module.${componentName} })),`;
+  if (routesSource.includes(`"${id}":`)) return routesSource;
 
-  if (!next.includes(importLine)) {
-    next = next.replace(
-      /import \{ BatchRenamer \} from "\.\/batch-renamer\/BatchRenamer";/,
-      `import { BatchRenamer } from "./batch-renamer/BatchRenamer";\nimport { ${componentName} } from "./${id}/${componentName}";`,
-    );
-  }
-
-  const routeLine = `  "${id}": ${componentName},`;
-  if (next.includes(routeLine)) return next;
-
-  return next.replace(
-    /  "batch-renamer": BatchRenamer,\n\};/,
-    `  "batch-renamer": BatchRenamer,\n  "${id}": ${componentName},\n};`,
+  return routesSource.replace(
+    /  "dependency-center": \(\) => import\("\.\/dependency-center\/DependencyCenter"\)\.then\(\(module\) => \(\{ default: module\.DependencyCenter \}\)\),\n\} satisfies/,
+    `  "dependency-center": () => import("./dependency-center/DependencyCenter").then((module) => ({ default: module.DependencyCenter })),\n${loaderLine}\n} satisfies`,
   );
 }
 

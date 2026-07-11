@@ -108,7 +108,7 @@ pub fn dependency_center_status() -> Vec<DependencyStatus> {
             },
             &["--version"],
             &["Optimizar PDF avanzado"],
-            "Instalar Ghostscript desde Artifex si se necesita compresión con perfiles de calidad.",
+            "1) Instalar desde ghostscript.com/releases (Windows 64-bit). 2) Ejecutar: powershell -ExecutionPolicy Bypass -File scripts\\prepare-sidecars.ps1. El instalador no agrega gswin64c al PATH; el script lo copia desde Program Files\\gs.",
             "Empaquetar binarios/licencias o pedir instalación externa según distribución.",
             "Recomprimir PDFs con perfiles de calidad/tamaño.",
         ),

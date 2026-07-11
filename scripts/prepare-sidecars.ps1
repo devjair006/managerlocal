@@ -67,6 +67,21 @@ foreach ($tool in $tools) {
   Copy-IfFound -ToolName $tool.Name -CommandName $tool.Command -RequiredFiles $tool.RequiredFiles
 }
 
+$ghostscriptRoots = @(
+  "C:\Program Files\gs",
+  "C:\Program Files (x86)\gs"
+) | ForEach-Object {
+  Get-ChildItem $_ -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { Join-Path $_.FullName "bin" }
+} | Where-Object { Test-Path (Join-Path $_ "gswin64c.exe") }
+
+if ($ghostscriptRoots.Count -gt 0 -and -not (Test-Path (Join-Path $target "gswin64c.exe"))) {
+  $ghostscriptBin = $ghostscriptRoots[0]
+  Copy-Item -LiteralPath (Join-Path $ghostscriptBin "gswin64c.exe") -Destination (Join-Path $target "gswin64c.exe") -Force
+  Get-ChildItem $ghostscriptBin -Filter *.dll -File -ErrorAction SilentlyContinue | Copy-Item -Destination $target -Force
+  Write-Host "COPIED   ghostscript -> gswin64c.exe (desde $ghostscriptBin)" -ForegroundColor Green
+  Write-Host "WARN     ghostscript puede requerir DLLs/datos adicionales junto al ejecutable." -ForegroundColor DarkYellow
+}
+
 $tesseractRoots = @(@(
   "C:\Program Files\Tesseract-OCR",
   "C:\Program Files (x86)\Tesseract-OCR"

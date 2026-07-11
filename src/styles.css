@@ -42,7 +42,7 @@ body {
     border-radius: 12px;
     background: radial-gradient(circle at 13% 0%, rgba(79, 95, 156, .2), transparent 34%), radial-gradient(circle at 88% 100%, rgba(139, 38, 63, .18), transparent 40%), rgba(20, 17, 29, var(--panel-opacity));
     box-shadow: inset 0 1px rgba(255, 255, 255, .04);
-    backdrop-filter: blur(30px) saturate(135%);
+    backdrop-filter: blur(14px) saturate(120%);
 }
 
 .titlebar {
@@ -207,6 +207,7 @@ body {
     padding: 36px 42px 48px;
     scrollbar-width: thin;
     scrollbar-color: rgba(167, 139, 250, .3) transparent;
+    contain: layout style;
 }
 
 .content::-webkit-scrollbar {
@@ -465,14 +466,15 @@ body {
 .tool-card {
     position: relative;
     min-height: 116px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 116px;
     border: 1px solid rgba(255, 255, 255, .075);
     border-radius: 12px;
     background: rgba(255, 255, 255, .035);
-    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    transition: border-color .14s ease, background .14s ease;
 }
 
 .tool-card:not(.disabled):hover {
-    transform: translateY(-2px);
     border-color: rgba(167, 139, 250, .38);
     background: rgba(255, 255, 255, .06);
 }
@@ -750,8 +752,7 @@ input[type=range] {
     z-index: 10;
     display: grid;
     place-items: center;
-    background: rgba(5, 3, 8, .58);
-    backdrop-filter: blur(8px);
+    background: rgba(5, 3, 8, .72);
 }
 
 .settings-modal {
@@ -812,14 +813,13 @@ input[type=range] {
     color: #a7a1af;
     background: rgba(255, 255, 255, .025);
     cursor: pointer;
-    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    transition: border-color .18s ease, background .18s ease;
 }
 
 .image-dropzone:hover,
 .image-dropzone.dragging {
     border-color: #a78bfa;
     background: rgba(139, 92, 246, .09);
-    transform: translateY(-2px);
 }
 
 .image-dropzone strong {
@@ -1058,6 +1058,41 @@ input[type=range] {
 .ocr-result { margin-top: 16px; }.ocr-result > div { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
 .ocr-result strong { color: #c9c4cf; font-size: 10px; }.ocr-result button { display: flex; align-items: center; gap: 5px; padding: 6px 8px; border: 0; border-radius: 6px; color: #aaa4b2; background: rgba(255,255,255,.06); cursor: pointer; font-size: 9px; }
 .ocr-result textarea { width: 100%; min-height: 280px; resize: vertical; padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; outline: none; color: #e7e3e9; background: rgba(4,3,7,.3); font: 11px/1.6 Consolas,monospace; }
+
+.tool-loading {
+    display: grid;
+    place-items: center;
+    gap: 12px;
+    min-height: 280px;
+    color: #8f8998;
+    font-size: 12px;
+}
+
+.tool-loading-spinner {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(167, 139, 250, .22);
+    border-top-color: #a78bfa;
+    border-radius: 50%;
+    animation: tool-spin .7s linear infinite;
+}
+
+@keyframes tool-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tool-loading-spinner {
+        animation: none;
+        border-top-color: rgba(167, 139, 250, .55);
+    }
+
+    .tool-card,
+    .window-controls button,
+    .image-dropzone {
+        transition: none;
+    }
+}
 
 @media(max-width:1000px) {
     .content {

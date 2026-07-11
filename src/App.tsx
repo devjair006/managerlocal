@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowSquareOut,
   ClockCounterClockwise,
@@ -15,7 +15,7 @@ import {
 import logo from "./assets/logoManagerTools.png";
 import { getDependencyCenterStatus, type DependencyStatus } from "./modules/dependency-center/dependency-center.service";
 import { categories, tools } from "./modules/registry";
-import { toolViews } from "./modules/tool-routes";
+import { hasToolView, lazyToolViews } from "./modules/tool-routes";
 import { WindowControls } from "./components/WindowControls";
 import { clearRecentOutputs, listenToRecentOutputs, loadRecentOutputs, type RecentOutput } from "./services/output-history";
 import { openPath, revealPath } from "./services/file-actions";
@@ -102,18 +102,29 @@ export function App() {
 
   useEffect(() => {
     if (!("__TAURI_INTERNALS__" in window)) return;
-    void getDependencyCenterStatus()
-      .then((items) => {
-        setDependencyStatus(items);
-        setDependencyError("");
-      })
-      .catch((cause) => setDependencyError(cause instanceof Error ? cause.message : String(cause)));
+
+    const loadDependencies = () => {
+      void getDependencyCenterStatus()
+        .then((items) => {
+          setDependencyStatus(items);
+          setDependencyError("");
+        })
+        .catch((cause) => setDependencyError(cause instanceof Error ? cause.message : String(cause)));
+    };
+
+    const idleId = window.requestIdleCallback?.(loadDependencies, { timeout: 2500 });
+    const timeoutId = idleId === undefined ? window.setTimeout(loadDependencies, 1500) : undefined;
+
+    return () => {
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   const toolsById = useMemo(() => new Map(tools.map((tool) => [tool.id, tool])), []);
 
   function openTool(toolId: string) {
-    if (!toolViews[toolId]) return;
+    if (!hasToolView(toolId)) return;
     setActiveTool(toolId);
     setRecentIds((current) => [toolId, ...current.filter((id) => id !== toolId)].slice(0, MAX_RECENTS));
   }
@@ -138,11 +149,11 @@ export function App() {
 
   const recentTools = recentIds.map((id) => toolsById.get(id)).filter(Boolean).slice(0, 4);
   const favoriteTools = favoriteIds.map((id) => toolsById.get(id)).filter(Boolean).slice(0, 4);
-  const availableToolsCount = tools.filter((tool) => tool.status === "available" && toolViews[tool.id]).length;
+  const availableToolsCount = tools.filter((tool) => tool.status === "available" && hasToolView(tool.id)).length;
   const readyDependencies = dependencyStatus.filter((item) => item.available);
   const missingDependencies = dependencyStatus.filter((item) => !item.available);
   const importantMissingDependencies = missingDependencies.filter((item) => ["whisper", "rembg", "ghostscript"].includes(item.id)).slice(0, 3);
-  const ActiveTool = activeTool ? toolViews[activeTool] : null;
+  const ActiveTool = activeTool && hasToolView(activeTool) ? lazyToolViews[activeTool] : null;
 
   const pageTitle = section === "recent" ? "Recientes" : section === "favorites" ? "Favoritos" : "Todas las herramientas";
   const pageDescription = section === "recent"
@@ -182,7 +193,11 @@ export function App() {
           </aside>
 
           <main className="content">
-            {ActiveTool ? <ActiveTool onBack={() => setActiveTool(null)} /> : (
+            {ActiveTool ? (
+              <Suspense fallback={<div className="tool-loading"><span className="tool-loading-spinner" aria-hidden="true" /><p>Cargando herramienta...</p></div>}>
+                <ActiveTool onBack={() => setActiveTool(null)} />
+              </Suspense>
+            ) : (
               <>
                 <div className="content-header">
                   <div>
@@ -249,7 +264,7 @@ export function App() {
                 <div className="tool-grid">
                   {filteredTools.map((tool) => {
                     const Icon = tool.icon;
-                    const canOpen = tool.status === "available" && Boolean(toolViews[tool.id]);
+                    const canOpen = tool.status === "available" && hasToolView(tool.id);
                     const isFavorite = favoriteIds.includes(tool.id);
 
                     return (

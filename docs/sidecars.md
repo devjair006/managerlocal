@@ -32,6 +32,7 @@ src-tauri/binaries/ffmpeg.exe
 src-tauri/binaries/ffprobe.exe
 src-tauri/binaries/pdftoppm.exe
 src-tauri/binaries/tesseract.exe
+src-tauri/binaries/gswin64c.exe
 src-tauri/binaries/mutool.exe
 src-tauri/binaries/yt-dlp.exe
 src-tauri/binaries/whisper-cli.exe
@@ -43,6 +44,40 @@ Puedes copiar automáticamente los ejecutables encontrados en tu `PATH` con:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\prepare-sidecars.ps1
 ```
+
+El script también busca instalaciones típicas aunque no estén en `PATH` (por ejemplo Ghostscript en `C:\Program Files\gs\` y Tesseract en `Program Files`).
+
+## Ghostscript (PDF avanzado)
+
+Ghostscript **no está en winget**. Instalarlo no basta: el instalador casi nunca deja `gswin64c` en el `PATH`, y la app no lo busca en `Program Files` directamente.
+
+### Pasos
+
+1. Descarga **AGPL** o **GPL** → Windows 64-bit desde [ghostscript.com/releases/gsdnld.html](https://ghostscript.com/releases/gsdnld.html).
+2. Instala con las opciones por defecto (queda en `C:\Program Files\gs\gs10.xx.x\bin\`).
+3. Desde la carpeta del proyecto, copia el sidecar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\prepare-sidecars.ps1
+```
+
+Deberías ver: `COPIED ghostscript -> gswin64c.exe (desde C:\Program Files\gs\...)`.
+
+4. Reinicia la app (`npm run tauri dev`) y refresca el Centro de dependencias.
+
+### Si sigue en FALTA
+
+Copia manual a las carpetas que usa el desarrollo:
+
+```powershell
+$gs = Get-ChildItem "C:\Program Files\gs" -Recurse -Filter gswin64c.exe | Select-Object -First 1
+Copy-Item $gs.FullName "src-tauri\binaries\gswin64c.exe" -Force
+Copy-Item $gs.FullName "src-tauri\target\debug\binaries\gswin64c.exe" -Force
+```
+
+### ¿Es obligatorio?
+
+No. Si ya tienes **mutool**, puedes optimizar PDF sin Ghostscript. Ghostscript añade perfiles de compresión más finos en **Optimizar PDF avanzado**.
 
 ## Modelos Whisper
 
