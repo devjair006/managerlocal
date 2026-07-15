@@ -60,6 +60,7 @@ function outputTime(createdAt: number) {
 }
 
 export function App() {
+  const isDesktopApp = "__TAURI_INTERNALS__" in window;
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("Todas");
   const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -164,15 +165,17 @@ export function App() {
 
   return (
     <div className="desktop-stage" style={{ "--panel-opacity": opacity / 100 } as React.CSSProperties}>
-      <div className="app-window">
-        <header className="titlebar" data-tauri-drag-region onMouseDown={(event) => void handleTitlebarMouseDown(event)}>
-          <div className="brand" data-tauri-drag-region>
-            <img className="brand-logo" src={logo} alt="" data-tauri-drag-region />
-            <strong data-tauri-drag-region>Manager Local</strong>
-          </div>
-          <div className="titlebar-drag-area" data-tauri-drag-region><span className="local-badge" data-tauri-drag-region>Todo permanece en tu equipo</span></div>
-          <WindowControls />
-        </header>
+      <div className={isDesktopApp ? "app-window" : "app-window web-preview"}>
+        {isDesktopApp && (
+          <header className="titlebar" data-tauri-drag-region onMouseDown={(event) => void handleTitlebarMouseDown(event)}>
+            <div className="brand" data-tauri-drag-region>
+              <img className="brand-logo" src={logo} alt="" data-tauri-drag-region />
+              <strong data-tauri-drag-region>Manager Local</strong>
+            </div>
+            <div className="titlebar-drag-area" data-tauri-drag-region><span className="local-badge" data-tauri-drag-region>Todo permanece en tu equipo</span></div>
+            <WindowControls />
+          </header>
+        )}
 
         <div className="app-body">
           <aside className="sidebar">
