@@ -66,15 +66,7 @@ fn managed_rembg_executable() -> Option<String> {
         return None;
     }
 
-    let output = binaries::command(executable.to_string_lossy().as_ref())
-        .arg("--help")
-        .output()
-        .ok()?;
-    if output.status.success() {
-        Some(executable.to_string_lossy().into_owned())
-    } else {
-        None
-    }
+    Some(executable.to_string_lossy().into_owned())
 }
 
 fn rembg_executable() -> Option<String> {

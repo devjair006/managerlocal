@@ -207,7 +207,6 @@ body {
     padding: 36px 42px 48px;
     scrollbar-width: thin;
     scrollbar-color: rgba(167, 139, 250, .3) transparent;
-    contain: layout style;
 }
 
 .content::-webkit-scrollbar {
@@ -466,8 +465,6 @@ body {
 .tool-card {
     position: relative;
     min-height: 116px;
-    content-visibility: auto;
-    contain-intrinsic-size: auto 116px;
     border: 1px solid rgba(255, 255, 255, .075);
     border-radius: 12px;
     background: rgba(255, 255, 255, .035);
