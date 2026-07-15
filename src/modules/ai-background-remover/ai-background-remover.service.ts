@@ -44,6 +44,7 @@ export async function removeBackgroundAi(input: {
   outputPath: string;
   model: AiBackgroundModel;
   alphaMatting: boolean;
+  optimizeSize: boolean;
 }): Promise<string> {
   requireDesktop();
   const { invoke } = await import("@tauri-apps/api/core");

@@ -1101,6 +1101,48 @@ input[type=range] {
     font-size: 12px;
 }
 
+.quality-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.quality-option {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 10px;
+    color: #aaa4b2;
+    background: rgba(255, 255, 255, .03);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .14s ease, background .14s ease;
+}
+
+.quality-option.active {
+    border-color: rgba(167, 139, 250, .42);
+    background: rgba(167, 139, 250, .08);
+    color: #e7e3e9;
+}
+
+.quality-option:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.quality-option strong {
+    display: block;
+    font-size: 12px;
+}
+
+.quality-option small {
+    display: block;
+    color: #8f8998;
+    font-size: 9px;
+    line-height: 1.35;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .tool-loading-spinner {
         animation: none;

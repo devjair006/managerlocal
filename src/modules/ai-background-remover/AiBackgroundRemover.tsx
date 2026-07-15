@@ -42,8 +42,9 @@ export function AiBackgroundRemover({ onBack }: Props) {
   const [inputPreview, setInputPreview] = useState("");
   const [outputPath, setOutputPath] = useState("");
   const [outputPreview, setOutputPreview] = useState("");
-  const [model, setModel] = useState<AiBackgroundModel>("default");
-  const [alphaMatting, setAlphaMatting] = useState(true);
+  const [model, setModel] = useState<AiBackgroundModel>("u2net");
+  const [qualityMode, setQualityMode] = useState(false);
+  const [optimizeSize, setOptimizeSize] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [progressStage, setProgressStage] = useState<AiBackgroundProgressStage | null>(null);
   const [copied, setCopied] = useState(false);
@@ -113,7 +114,14 @@ export function AiBackgroundRemover({ onBack }: Props) {
         setProgressStage(null);
         return;
       }
-      const saved = await removeBackgroundAi({ inputPath, outputPath: target, model, alphaMatting });
+      const effectiveModel = qualityMode ? model : "u2net";
+      const saved = await removeBackgroundAi({
+        inputPath,
+        outputPath: target,
+        model: effectiveModel,
+        alphaMatting: qualityMode,
+        optimizeSize,
+      });
       setOutputPath(saved);
       setOutputPreview(await imageSrc(saved));
       setError("");
@@ -151,16 +159,25 @@ export function AiBackgroundRemover({ onBack }: Props) {
 
         <div className="operation-tabs compact-tabs">
           {models.map((item) => (
-            <button key={item.id} className={model === item.id ? "operation-tab active" : "operation-tab"} onClick={() => setModel(item.id)} disabled={processing}>
+            <button key={item.id} className={model === item.id ? "operation-tab active" : "operation-tab"} onClick={() => setModel(item.id)} disabled={processing || !qualityMode}>
               <MagicWand weight="duotone" />
               <span><strong>{item.label}</strong><small>{item.description}</small></span>
             </button>
           ))}
         </div>
 
+        <div className="quality-toggle">
+          <button className={qualityMode ? "quality-option" : "quality-option active"} onClick={() => setQualityMode(false)} disabled={processing}>
+            <span><strong>Rápido</strong><small>u2net · sin alpha matting · ideal para productos y formas simples</small></span>
+          </button>
+          <button className={qualityMode ? "quality-option active" : "quality-option"} onClick={() => setQualityMode(true)} disabled={processing}>
+            <span><strong>Calidad</strong><small>modelo seleccionado · alpha matting · mejora pelo, pelos y bordes suaves</small></span>
+          </button>
+        </div>
+
         <label className="permission-confirm">
-          <input type="checkbox" checked={alphaMatting} onChange={(event) => setAlphaMatting(event.target.checked)} disabled={processing} />
-          Refinar bordes con alpha matting. Tarda más, pero suele mejorar pelo, productos y bordes suaves.
+          <input type="checkbox" checked={optimizeSize} onChange={(event) => setOptimizeSize(event.target.checked)} disabled={processing} />
+          Optimizar imágenes grandes antes de procesar. Reduce a 2048 px el lado más largo: mucho más rápido y consume menos RAM.
         </label>
 
         <div className="dependency-actions transcription-actions">

@@ -1,6 +1,7 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
+use image::imageops::FilterType;
 use serde::{Deserialize, Serialize};
 use tokio::process::Command as TokioCommand;
 use tokio::sync::oneshot;
@@ -9,6 +10,8 @@ use tokio::time::{timeout, Duration};
 use tauri::{Emitter, Manager, State};
 
 use super::binaries;
+
+const MAX_INPUT_DIMENSION: u32 = 2048;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,6 +28,7 @@ pub struct AiBackgroundInput {
     output_path: String,
     model: String,
     alpha_matting: bool,
+    optimize_size: bool,
 }
 
 #[derive(Clone, Serialize)]
@@ -121,6 +125,40 @@ fn validate_paths(input_path: &str, output_path: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn temporary_resized_path(input_path: &str) -> PathBuf {
+    let input = Path::new(input_path);
+    let parent = input.parent().unwrap_or(Path::new("."));
+    let stem = input
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .unwrap_or("input");
+    parent.join(format!("{stem}-managerlocal-resized.png"))
+}
+
+fn resize_image_if_needed(input_path: &str, optimize: bool) -> Result<(String, Option<PathBuf>), String> {
+    if !optimize {
+        return Ok((input_path.into(), None));
+    }
+
+    let img = image::open(input_path)
+        .map_err(|error| format!("No se pudo leer la imagen para optimizar: {error}"))?;
+    let (width, height) = (img.width(), img.height());
+    if width <= MAX_INPUT_DIMENSION && height <= MAX_INPUT_DIMENSION {
+        return Ok((input_path.into(), None));
+    }
+
+    let scale = MAX_INPUT_DIMENSION as f32 / width.max(height) as f32;
+    let new_width = (width as f32 * scale).max(1.0) as u32;
+    let new_height = (height as f32 * scale).max(1.0) as u32;
+
+    let resized = img.resize(new_width, new_height, FilterType::Triangle);
+    let temp_path = temporary_resized_path(input_path);
+    resized
+        .save_with_format(&temp_path, image::ImageFormat::Png)
+        .map_err(|error| format!("No se pudo guardar la imagen optimizada: {error}"))?;
+    Ok((temp_path.to_string_lossy().into_owned(), Some(temp_path)))
+}
+
 #[tauri::command]
 pub fn ai_background_runtime() -> AiBackgroundRuntime {
     let executable = rembg_executable();
@@ -159,10 +197,20 @@ pub async fn remove_background_ai(
         let state = app.state::<std::sync::Mutex<AiBackgroundCancelToken>>();
         if let Ok(mut token) = state.lock() {
             token.sender = Some(cancel_tx);
-        }
+        };
     }
 
     let _ = window.emit("rembg-progress", AiBackgroundProgress::Starting);
+
+    let input_path = input.input_path.clone();
+    let optimize = input.optimize_size;
+    let (effective_input, temp_path) = tokio::task::spawn_blocking(move || {
+        resize_image_if_needed(&input_path, optimize)
+    })
+    .await
+    .map_err(|error| format!("Error al preparar la imagen: {error}"))??;
+
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::DownloadingModel);
 
     let mut std_command = std::process::Command::new(&executable);
     #[cfg(target_os = "windows")]
@@ -179,9 +227,7 @@ pub async fn remove_background_ai(
     if let Some(model) = model {
         command.args(["-m", model]);
     }
-    command.arg(&input.input_path).arg(&input.output_path);
-
-    let _ = window.emit("rembg-progress", AiBackgroundProgress::DownloadingModel);
+    command.arg(&effective_input).arg(&input.output_path);
 
     let child = command
         .kill_on_drop(true)
@@ -194,6 +240,9 @@ pub async fn remove_background_ai(
         biased;
         _ = &mut cancel_rx => {
             let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+            if let Some(temp) = temp_path {
+                let _ = fs::remove_file(temp);
+            }
             return Err("Proceso cancelado".into());
         }
         output = timeout(Duration::from_secs(600), child.wait_with_output()) => {
@@ -201,10 +250,16 @@ pub async fn remove_background_ai(
                 Ok(Ok(output)) => output,
                 Ok(Err(error)) => {
                     let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+                    if let Some(temp) = temp_path {
+                        let _ = fs::remove_file(temp);
+                    }
                     return Err(format!("No se pudo ejecutar rembg: {error}"));
                 }
                 Err(_) => {
                     let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+                    if let Some(temp) = temp_path {
+                        let _ = fs::remove_file(temp);
+                    }
                     return Err("rembg excedió el tiempo máximo de 10 minutos".into());
                 }
             }
@@ -216,6 +271,9 @@ pub async fn remove_background_ai(
     if !result.status.success() {
         let stderr = String::from_utf8_lossy(&result.stderr).trim().to_string();
         let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+        if let Some(temp) = temp_path {
+            let _ = fs::remove_file(temp);
+        }
         return Err(if stderr.is_empty() {
             "rembg no pudo quitar el fondo".into()
         } else {
@@ -224,7 +282,14 @@ pub async fn remove_background_ai(
     }
     if !Path::new(&input.output_path).is_file() {
         let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+        if let Some(temp) = temp_path {
+            let _ = fs::remove_file(temp);
+        }
         return Err("rembg terminó sin crear el archivo de salida".into());
+    }
+
+    if let Some(temp) = temp_path {
+        let _ = fs::remove_file(temp);
     }
 
     let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
