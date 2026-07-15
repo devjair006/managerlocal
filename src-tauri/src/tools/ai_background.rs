@@ -2,6 +2,11 @@ use std::fs;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
+use tokio::process::Command as TokioCommand;
+use tokio::sync::oneshot;
+use tokio::time::{timeout, Duration};
+
+use tauri::{Emitter, Manager, State};
 
 use super::binaries;
 
@@ -20,6 +25,28 @@ pub struct AiBackgroundInput {
     output_path: String,
     model: String,
     alpha_matting: bool,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase", tag = "stage")]
+pub enum AiBackgroundProgress {
+    Starting,
+    DownloadingModel,
+    Processing,
+    Saving,
+    Done,
+}
+
+pub struct AiBackgroundCancelToken {
+    pub sender: Option<oneshot::Sender<()>>,
+}
+
+impl AiBackgroundCancelToken {
+    pub fn cancel(&mut self) {
+        if let Some(sender) = self.sender.take() {
+            let _ = sender.send(());
+        }
+    }
 }
 
 fn rembg_models_directory() -> std::path::PathBuf {
@@ -105,19 +132,46 @@ pub fn ai_background_runtime() -> AiBackgroundRuntime {
 }
 
 #[tauri::command]
-pub fn remove_background_ai(input: AiBackgroundInput) -> Result<String, String> {
+pub fn cancel_remove_background_ai(state: State<'_, std::sync::Mutex<AiBackgroundCancelToken>>) {
+    if let Ok(mut token) = state.lock() {
+        token.cancel();
+    }
+}
+
+#[tauri::command]
+pub async fn remove_background_ai(
+    input: AiBackgroundInput,
+    app: tauri::AppHandle,
+) -> Result<String, String> {
     validate_paths(&input.input_path, &input.output_path)?;
     let model = validate_model(&input.model)?;
-    if rembg_executable().is_none() {
-        return Err("Falta rembg. Instálalo o empaquétalo como sidecar para usar IA local.".into());
-    }
-
     let executable = rembg_executable()
         .ok_or("Falta rembg. Instálalo o empaquétalo como sidecar para usar IA local.")?;
+
     fs::create_dir_all(rembg_models_directory())
         .map_err(|error| format!("No se pudo preparar la carpeta de modelos: {error}"))?;
-    let mut command = binaries::command(&executable);
-    command.env("U2NET_HOME", rembg_models_directory());
+
+    let window = app.get_webview_window("main")
+        .ok_or("No se encontró la ventana principal")?;
+
+    let (cancel_tx, mut cancel_rx) = oneshot::channel::<()>();
+    {
+        let state = app.state::<std::sync::Mutex<AiBackgroundCancelToken>>();
+        if let Ok(mut token) = state.lock() {
+            token.sender = Some(cancel_tx);
+        }
+    }
+
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::Starting);
+
+    let mut std_command = std::process::Command::new(&executable);
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        std_command.creation_flags(0x08000000);
+    }
+    std_command.env("U2NET_HOME", rembg_models_directory());
+    let mut command = TokioCommand::from(std_command);
     command.arg("i");
     if input.alpha_matting {
         command.arg("-a");
@@ -125,14 +179,43 @@ pub fn remove_background_ai(input: AiBackgroundInput) -> Result<String, String> 
     if let Some(model) = model {
         command.args(["-m", model]);
     }
-    let output = command
-        .arg(&input.input_path)
-        .arg(&input.output_path)
-        .output()
+    command.arg(&input.input_path).arg(&input.output_path);
+
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::DownloadingModel);
+
+    let child = command
+        .kill_on_drop(true)
+        .spawn()
         .map_err(|error| format!("No se pudo ejecutar rembg: {error}"))?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::Processing);
+
+    let result = tokio::select! {
+        biased;
+        _ = &mut cancel_rx => {
+            let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+            return Err("Proceso cancelado".into());
+        }
+        output = timeout(Duration::from_secs(600), child.wait_with_output()) => {
+            match output {
+                Ok(Ok(output)) => output,
+                Ok(Err(error)) => {
+                    let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+                    return Err(format!("No se pudo ejecutar rembg: {error}"));
+                }
+                Err(_) => {
+                    let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
+                    return Err("rembg excedió el tiempo máximo de 10 minutos".into());
+                }
+            }
+        }
+    };
+
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::Saving);
+
+    if !result.status.success() {
+        let stderr = String::from_utf8_lossy(&result.stderr).trim().to_string();
+        let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
         return Err(if stderr.is_empty() {
             "rembg no pudo quitar el fondo".into()
         } else {
@@ -140,7 +223,10 @@ pub fn remove_background_ai(input: AiBackgroundInput) -> Result<String, String> 
         });
     }
     if !Path::new(&input.output_path).is_file() {
+        let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
         return Err("rembg terminó sin crear el archivo de salida".into());
     }
+
+    let _ = window.emit("rembg-progress", AiBackgroundProgress::Done);
     Ok(input.output_path)
 }

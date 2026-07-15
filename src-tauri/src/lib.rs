@@ -1,8 +1,11 @@
 mod tools;
 
+use tools::ai_background::AiBackgroundCancelToken;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .manage(std::sync::Mutex::new(AiBackgroundCancelToken { sender: None }))
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             tools::qr::generate_qr,
@@ -28,6 +31,7 @@ pub fn run() {
             tools::media_downloader::download_permitted_media,
             tools::ai_background::ai_background_runtime,
             tools::ai_background::remove_background_ai,
+            tools::ai_background::cancel_remove_background_ai,
             tools::dependency_center::dependency_center_status,
             tools::resource_manager::resource_manager_status,
             tools::resource_manager::open_resource_folder,

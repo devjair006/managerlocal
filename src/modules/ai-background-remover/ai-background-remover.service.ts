@@ -1,4 +1,8 @@
+import type { EventCallback, UnlistenFn } from "@tauri-apps/api/event";
+
 export type AiBackgroundModel = "default" | "u2net" | "u2net_human_seg" | "isnet-general-use" | "birefnet-general";
+
+export type AiBackgroundProgressStage = "starting" | "downloadingModel" | "processing" | "saving" | "done";
 
 export type AiBackgroundRuntime = {
   rembg: boolean;
@@ -46,8 +50,22 @@ export async function removeBackgroundAi(input: {
   return invoke<string>("remove_background_ai", { input });
 }
 
+export async function cancelRemoveBackgroundAi(): Promise<void> {
+  requireDesktop();
+  const { invoke } = await import("@tauri-apps/api/core");
+  return invoke("cancel_remove_background_ai");
+}
+
 export async function imageSrc(path: string): Promise<string> {
   requireDesktop();
   const { convertFileSrc } = await import("@tauri-apps/api/core");
   return convertFileSrc(path);
+}
+
+export async function listenAiBackgroundProgress(
+  onProgress: EventCallback<{ stage: AiBackgroundProgressStage }>,
+): Promise<UnlistenFn> {
+  requireDesktop();
+  const { listen } = await import("@tauri-apps/api/event");
+  return listen("rembg-progress", onProgress);
 }

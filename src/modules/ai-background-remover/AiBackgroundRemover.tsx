@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ClipboardText, ImageSquare, MagicWand, Sparkle } from "@phosphor-icons/react";
+import { ArrowLeft, ClipboardText, ImageSquare, MagicWand, Sparkle, X } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
 import {
+  cancelRemoveBackgroundAi,
   getAiBackgroundRuntime,
   imageSrc,
+  listenAiBackgroundProgress,
   pickAiBackgroundInput,
   pickAiBackgroundOutput,
   removeBackgroundAi,
   type AiBackgroundModel,
+  type AiBackgroundProgressStage,
   type AiBackgroundRuntime,
 } from "./ai-background-remover.service";
 
@@ -20,6 +23,14 @@ const models: { id: AiBackgroundModel; label: string; description: string }[] = 
   { id: "isnet-general-use", label: "IS-Net", description: "General con buen detalle en bordes." },
   { id: "birefnet-general", label: "BiRefNet", description: "Modelo moderno; puede requerir más descarga/memoria." },
 ];
+
+const progressLabels: Record<AiBackgroundProgressStage, string> = {
+  starting: "Iniciando rembg...",
+  downloadingModel: "Descargando modelo de IA...",
+  processing: "Recortando con IA...",
+  saving: "Guardando resultado...",
+  done: "Listo",
+};
 
 function name(path: string) {
   return path.split(/[\\/]/).pop() ?? path;
@@ -34,6 +45,7 @@ export function AiBackgroundRemover({ onBack }: Props) {
   const [model, setModel] = useState<AiBackgroundModel>("default");
   const [alphaMatting, setAlphaMatting] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [progressStage, setProgressStage] = useState<AiBackgroundProgressStage | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,6 +59,21 @@ export function AiBackgroundRemover({ onBack }: Props) {
   }
 
   useEffect(() => { void refreshRuntime(); }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let mounted = true;
+
+    listenAiBackgroundProgress((event) => {
+      if (!mounted) return;
+      setProgressStage(event.payload.stage);
+    }).then((fn) => { unlisten = fn; }).catch(() => undefined);
+
+    return () => {
+      mounted = false;
+      unlisten?.();
+    };
+  }, []);
 
   async function chooseInput() {
     try {
@@ -76,9 +103,16 @@ export function AiBackgroundRemover({ onBack }: Props) {
       return;
     }
     setProcessing(true);
+    setProgressStage("starting");
+    setOutputPath("");
+    setOutputPreview("");
     try {
       const target = await pickAiBackgroundOutput(name(inputPath).replace(/\.[^.]+$/, "-sin-fondo-ia.png"));
-      if (!target) return;
+      if (!target) {
+        setProcessing(false);
+        setProgressStage(null);
+        return;
+      }
       const saved = await removeBackgroundAi({ inputPath, outputPath: target, model, alphaMatting });
       setOutputPath(saved);
       setOutputPreview(await imageSrc(saved));
@@ -87,6 +121,15 @@ export function AiBackgroundRemover({ onBack }: Props) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       setProcessing(false);
+      setProgressStage(null);
+    }
+  }
+
+  async function cancel() {
+    try {
+      await cancelRemoveBackgroundAi();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
     }
   }
 
@@ -108,7 +151,7 @@ export function AiBackgroundRemover({ onBack }: Props) {
 
         <div className="operation-tabs compact-tabs">
           {models.map((item) => (
-            <button key={item.id} className={model === item.id ? "operation-tab active" : "operation-tab"} onClick={() => setModel(item.id)}>
+            <button key={item.id} className={model === item.id ? "operation-tab active" : "operation-tab"} onClick={() => setModel(item.id)} disabled={processing}>
               <MagicWand weight="duotone" />
               <span><strong>{item.label}</strong><small>{item.description}</small></span>
             </button>
@@ -116,17 +159,27 @@ export function AiBackgroundRemover({ onBack }: Props) {
         </div>
 
         <label className="permission-confirm">
-          <input type="checkbox" checked={alphaMatting} onChange={(event) => setAlphaMatting(event.target.checked)} />
+          <input type="checkbox" checked={alphaMatting} onChange={(event) => setAlphaMatting(event.target.checked)} disabled={processing} />
           Refinar bordes con alpha matting. Tarda más, pero suele mejorar pelo, productos y bordes suaves.
         </label>
 
         <div className="dependency-actions transcription-actions">
-          <button onClick={() => void refreshRuntime()}>Revisar rembg</button>
+          <button onClick={() => void refreshRuntime()} disabled={processing}>Revisar rembg</button>
           {runtime?.executable && <button onClick={() => void copyExecutable()}><ClipboardText /> {copied ? "Copiado" : "Copiar ruta"}</button>}
           {runtime?.modelsDirectory && <button onClick={() => void navigator.clipboard.writeText(runtime.modelsDirectory)}>Copiar carpeta de modelos</button>}
         </div>
 
         {!runtime?.rembg && <p className="tool-notice">Falta rembg. Instálalo de forma aislada con: <code>powershell -ExecutionPolicy Bypass -File scripts\install-rembg.ps1 -InstallPython</code>. La primera ejecución descargará el modelo elegido localmente.</p>}
+
+        {processing && progressStage && (
+          <div className="progress-card">
+            <div className="progress-info">
+              <span className="tool-loading-spinner" aria-hidden="true" />
+              <span>{progressLabels[progressStage]}</span>
+            </div>
+            <button className="secondary-button" onClick={() => void cancel()}><X /> Cancelar</button>
+          </div>
+        )}
 
         {(inputPreview || outputPreview) && (
           <div className="image-comparison">
