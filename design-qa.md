@@ -1,33 +1,43 @@
-# Design QA
+# Design QA — Estudio QR
 
-- Source visual truth: `design-reference.png`
-- Implementation screenshots: `implementation-pdf.png`, `implementation-video.png`, `implementation-rename.png`
-- Viewport: 1280 × 720
-- State: estados iniciales de los tres módulos nuevos
+Reference images:
 
-## Full-view comparison evidence
+- `C:\Users\jahir\AppData\Local\Temp\codex-clipboard-503b2ed0-bed1-40ea-aaba-f3329a04c4b4.png`
+- `C:\Users\jahir\AppData\Local\Temp\codex-clipboard-047d841e-fc6c-44fc-84bd-a3068c8ede2b.png`
+- `C:\Users\jahir\AppData\Local\Temp\codex-clipboard-1fd9efec-0a9c-401a-88e7-e4dd1b647199.png`
 
-Las pantallas conservan la estructura aprobada: título superior compacto, navegación lateral, superficie oscura translúcida, tarjetas con borde discreto y acento violeta. PDF y renombrado muestran el shell completo. La captura de video presentó un artefacto del compositor con las regiones transparentes; la inspección DOM confirmó que el shell mantiene dimensiones y estilos idénticos.
+Implementation evidence:
 
-## Focused region comparison evidence
+- `design-evidence\qr-studio-final.png`
+- `design-evidence\qr-studio-compact-final.png`
+- `design-evidence\qr-reference-comparison-final.png`
 
-- PDF: tabs de operación, selector y acción caben sin desbordamiento.
-- Multimedia: selector, seis formatos y acción conservan jerarquía y espaciado.
-- Renombrado: formulario en dos columnas, aviso y acción son legibles a 1280 × 720.
-- Tipografía, colores, imágenes, iconos y copy son coherentes con el resto de la aplicación.
+## Scope
+
+The reference was treated as functional inspiration, then translated into Manager Local's existing pixel-minimal design system. The implemented flow includes 15 content types, live preview, module and eye shapes, colors, transparent background, frames, logo placement, size, margin, error correction and PNG export.
+
+## Functional checks
+
+- Opened Estudio QR from the 19-tool dashboard.
+- Generated the initial URL QR locally.
+- Changed to WhatsApp, entered a phone number and message, and confirmed the preview data changed.
+- Applied a text frame and confirmed the preview data changed again.
+- Opened PDF mode and confirmed it requests a public URL rather than a local Windows path.
+- Confirmed all 15 content choices are exposed with accessible names.
+- Confirmed the save action is enabled when a valid payload exists.
+- Browser console: 0 errors and 0 warnings in the tested flow.
+- TypeScript, production Vite build and diff whitespace checks passed.
+
+## Visual comparison
+
+The combined evidence compares the source and implementation in one image. Manager Local preserves the source flow—content choices on the left and a persistent QR preview on the right—while using the product's near-black surfaces, green accent, pixel icons and compact metadata. The three-column content grid keeps all options scannable without copying the generic light web treatment.
+
+At 920 × 650 the editor collapses to one main column, the preview becomes non-sticky, the content choices remain three columns of 204 px, and no horizontal overflow occurs.
 
 ## Findings
 
-No quedan problemas P0, P1 o P2 en las pantallas revisadas.
-
-## Patches made
-
-- Se reemplazaron scaffolds por flujos funcionales completos.
-- Se añadieron estados vacíos, procesando, error y éxito.
-- Se añadieron selectores nativos, validaciones y prevención de colisiones.
-
-## Follow-up polish
-
-- P3: empaquetar FFmpeg como sidecar para distribución sin instalación previa.
+- No P0, P1 or P2 defects remain in the tested QR flow.
+- [P3] A physical-camera scan matrix across Android and iOS would be useful before print-production use, especially for logos and non-square module styles.
+- [P3] “Código 2D” from the reference is intentionally not mixed into this QR module; formats such as EAN, UPC and Data Matrix deserve a separate barcode tool.
 
 final result: passed

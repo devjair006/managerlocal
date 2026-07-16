@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ArrowLeft, DownloadSimple, ImageSquare, MagicWand, UploadSimple } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { removeWhiteBackground } from "./background.service";
 
 interface Props { onBack: () => void; }
@@ -64,7 +65,7 @@ export function BackgroundRemover({ onBack }: Props) {
     <section className="tool-view background-tool">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon background-icon"><MagicWand weight="duotone" /></span>
+        <ToolPixelIcon toolId="background-remover" className="background-icon" />
         <div><p className="eyebrow">Imágenes</p><h1>Quitar fondo blanco</h1><p>Elimina tonos blancos localmente y conserva el resultado como PNG.</p></div>
       </div>
 

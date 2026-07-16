@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, Copy, FileAudio, FloppyDisk, Waveform } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { openResourceFolder } from "../dependency-center/resource-manager.service";
 import { saveTextOutput } from "../../services/text-output";
 import { getTranscriptionRuntime, pickAudioFile, pickWhisperModel, transcribeLocal, type TranscriptionRuntime } from "./local-transcription.service";
@@ -110,7 +111,7 @@ export function LocalTranscription({ onBack }: Props) {
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon video-icon"><Waveform weight="duotone" /></span>
+        <ToolPixelIcon toolId="local-transcription" className="video-icon" />
         <div>
           <p className="eyebrow">Multimedia</p>
           <h1>Transcripción local</h1>

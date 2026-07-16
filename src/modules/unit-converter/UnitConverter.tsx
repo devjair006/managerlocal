@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowsLeftRight, CalendarBlank, Ruler } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { convertUnit, formatInZone, timeZones, unitCategories, zonedDateToInstant, type UnitCategory } from "./unit-converter.service";
 
 interface Props { onBack: () => void }
@@ -18,7 +19,7 @@ export function UnitConverter({ onBack }: Props) {
   function swapUnits() { setFrom(to); setTo(from); }
 
   return <section className="tool-view"><button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon unit-icon"><Ruler weight="duotone" /></span><div><p className="eyebrow">Productividad</p><h1>Conversor universal</h1><p>Convierte unidades, fechas y zonas horarias sin conexión.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="unit-converter" className="unit-icon" /><div><p className="eyebrow">Productividad</p><h1>Conversor universal</h1><p>Convierte unidades, fechas y zonas horarias sin conexión.</p></div></div>
     <div className="unit-mode-tabs"><button className={mode === "units" ? "active" : ""} onClick={() => setMode("units")}><Ruler /> Unidades</button><button className={mode === "time" ? "active" : ""} onClick={() => setMode("time")}><CalendarBlank /> Fecha y hora</button></div>
     {mode === "units" ? <div className="file-tool-panel unit-panel">
       <div className="unit-categories">{(Object.keys(unitCategories) as UnitCategory[]).map((key) => <button key={key} className={category === key ? "active" : ""} onClick={() => changeCategory(key)}>{unitCategories[key].label}</button>)}</div>

@@ -15,6 +15,7 @@
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@vitejs/plugin-react": "5.0.4",
+    "pixelarticons": "^2.2.0",
     "qrcode": "^1.5.4",
     "react": "19.2.0",
     "react-dom": "19.2.0",

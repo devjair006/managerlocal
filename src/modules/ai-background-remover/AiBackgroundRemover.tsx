@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ClipboardText, ImageSquare, MagicWand, Sparkle, X } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import {
   cancelRemoveBackgroundAi,
   getAiBackgroundRuntime,
@@ -145,7 +146,7 @@ export function AiBackgroundRemover({ onBack }: Props) {
     <section className="tool-view background-tool">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon background-icon"><Sparkle weight="duotone" /></span>
+        <ToolPixelIcon toolId="ai-background-remover" className="background-icon" />
         <div><p className="eyebrow">Imágenes</p><h1>Quitar fondo con IA local</h1><p>Separa sujeto y fondo usando rembg sin subir imágenes a internet.</p></div>
       </div>
 

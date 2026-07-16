@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FilePdf, Gauge } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import {
   getPdfOptimizerRuntime,
   optimizePdfAdvanced,
@@ -88,7 +89,7 @@ export function AdvancedPdfOptimizer({ onBack }: Props) {
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon pdf-icon"><Gauge weight="duotone" /></span>
+        <ToolPixelIcon toolId="advanced-pdf-optimizer" className="pdf-icon" />
         <div>
           <p className="eyebrow">PDF</p>
           <h1>Optimizador PDF avanzado</h1>

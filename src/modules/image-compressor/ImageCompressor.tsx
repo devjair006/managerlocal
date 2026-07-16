@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, FileImage, FolderOpen, Gauge, Images } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { compressImages, pickCompressionFolder, pickImagesToCompress, type CompressionResult } from "./image-compressor.service";
 
 interface Props { onBack: () => void; }
@@ -49,7 +50,7 @@ export function ImageCompressor({ onBack }: Props) {
 
   return <section className="tool-view">
     <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon compressor-icon"><Gauge weight="duotone" /></span><div><p className="eyebrow">Imágenes</p><h1>Comprimir imágenes por lotes</h1><p>Reduce el peso de varias imágenes y compara el resultado.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="image-compressor" className="compressor-icon" /><div><p className="eyebrow">Imágenes</p><h1>Comprimir imágenes por lotes</h1><p>Reduce el peso de varias imágenes y compara el resultado.</p></div></div>
     <div className="file-tool-panel">
       <div className="compressor-pickers">
         <button className="media-picker" onClick={() => void chooseImages()}><Images weight="duotone" /><span><strong>Seleccionar imágenes</strong><small>{paths.length ? `${paths.length} seleccionadas` : "PNG, JPG, WebP, BMP o TIFF · hasta 100"}</small></span></button>

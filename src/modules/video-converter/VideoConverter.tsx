@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, FilmStrip, MusicNotes, VideoCamera } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { ffmpegAvailable, pickMediaFile, pickMediaOutput, videoConverter, type MediaFormat } from "./video-converter.service";
 
 interface Props { onBack: () => void; }
@@ -30,7 +31,7 @@ export function VideoConverter({ onBack }: Props) {
 
   return <section className="tool-view">
     <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon video-icon"><VideoCamera weight="duotone" /></span><div><p className="eyebrow">Multimedia</p><h1>Convertir audio y video</h1><p>Convierte formatos localmente utilizando FFmpeg.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="video-converter" className="video-icon" /><div><p className="eyebrow">Multimedia</p><h1>Convertir audio y video</h1><p>Convierte formatos localmente utilizando FFmpeg.</p></div></div>
     <div className="file-tool-panel">
       <div className="runtime-status"><span className={available ? "runtime-dot ready" : "runtime-dot"} />{available === null ? "Comprobando FFmpeg..." : available ? "FFmpeg disponible" : "FFmpeg no encontrado"}</div>
       <button className="media-picker" onClick={() => void choose()}><FilmStrip weight="duotone" /><span><strong>{inputPath ? nameFromPath(inputPath) : "Seleccionar audio o video"}</strong><small>MP4, WebM, MOV, MKV, AVI, MP3, WAV, M4A, OGG o FLAC</small></span></button>

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ArrowLeft, DownloadSimple, ImageSquare, UploadSimple } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { imageConverter, type ImageFormat } from "./image-converter.service";
 
 interface Props { onBack: () => void; }
@@ -62,7 +63,7 @@ export function ImageConverter({ onBack }: Props) {
   return (
     <section className="tool-view background-tool">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-      <div className="tool-heading"><span className="tool-heading-icon converter-icon"><ImageSquare weight="duotone" /></span><div><p className="eyebrow">Imágenes</p><h1>Convertir imágenes</h1><p>Convierte PNG, JPG y WebP localmente, sin subir archivos.</p></div></div>
+      <div className="tool-heading"><ToolPixelIcon toolId="image-converter" className="converter-icon" /><div><p className="eyebrow">Imágenes</p><h1>Convertir imágenes</h1><p>Convierte PNG, JPG y WebP localmente, sin subir archivos.</p></div></div>
 
       {!original ? (
         <button className="image-dropzone" onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void selectFile(event.dataTransfer.files[0]); }}>

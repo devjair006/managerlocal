@@ -1,4 +1,4 @@
-import type { Icon } from "@phosphor-icons/react";
+import type { ComponentType, SVGProps } from "react";
 
 export type ToolCategory = "Imágenes" | "PDF" | "Productividad" | "Multimedia";
 
@@ -7,7 +7,7 @@ export interface ToolDefinition {
   name: string;
   description: string;
   category: ToolCategory;
-  icon: Icon;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   accent: string;
   status: "available" | "soon";
 }

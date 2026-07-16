@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, FilePdf, Files, Images, Scissors, Stack } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { pdfTools, pickImageFiles, pickOutputDirectory, pickPdfFiles, pickPdfOutput, type PdfOperation } from "./pdf-tools.service";
 
 interface Props { onBack: () => void; }
@@ -60,7 +61,7 @@ export function PdfTools({ onBack }: Props) {
   return (
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-      <div className="tool-heading"><span className="tool-heading-icon pdf-icon"><FilePdf weight="duotone" /></span><div><p className="eyebrow">PDF</p><h1>Herramientas PDF</h1><p>Une, extrae, optimiza y convierte documentos localmente.</p></div></div>
+      <div className="tool-heading"><ToolPixelIcon toolId="pdf-tools" className="pdf-icon" /><div><p className="eyebrow">PDF</p><h1>Herramientas PDF</h1><p>Une, extrae, optimiza y convierte documentos localmente.</p></div></div>
       <div className="operation-tabs">{operations.map(({ id, label, description, icon: Icon }) => <button key={id} className={operation === id ? "operation-tab active" : "operation-tab"} onClick={() => { setOperation(id); setPaths([]); setResult(""); }}><Icon weight="duotone" /><span><strong>{label}</strong><small>{description}</small></span></button>)}</div>
       <div className="file-tool-panel">
         <div className="file-picker-row"><div><strong>{operation === "merge" ? "Documentos a combinar" : operation === "images_to_pdf" ? "Imágenes y orden de páginas" : "Documento de entrada"}</strong><small>{paths.length ? `${paths.length} archivo(s) seleccionado(s)` : "No has seleccionado archivos"}</small></div><button className="secondary-button" onClick={() => void chooseFiles()}>{operation === "images_to_pdf" ? "Seleccionar imágenes" : "Seleccionar PDF"}</button></div>

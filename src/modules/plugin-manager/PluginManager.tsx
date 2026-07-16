@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle, Cube, Plug, ShieldCheck, ShieldWarning, WarningCircle } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { getPluginSystemStatus, scanLocalPlugins, type PluginAudit, type PluginSystemStatus } from "./plugin-manager.service";
 
 interface Props { onBack: () => void; }
@@ -39,7 +40,7 @@ export function PluginManager({ onBack }: Props) {
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon plugin-icon"><Plug weight="duotone" /></span>
+        <ToolPixelIcon toolId="plugin-manager" className="plugin-icon" />
         <div>
           <p className="eyebrow">Arquitectura</p>
           <h1>Plugins seguros</h1>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowsClockwise, Check, Copy, LockKey } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 
 interface Props { onBack: () => void; }
 
@@ -75,7 +76,7 @@ export function PasswordGenerator({ onBack }: Props) {
 
   return <section className="tool-view password-tool">
     <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon password-icon"><LockKey weight="duotone" /></span><div><p className="eyebrow">Privacidad</p><h1>Contraseñas seguras</h1><p>Genera contraseñas y frases aleatorias sin guardarlas ni enviarlas fuera del equipo.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="password-generator" className="password-icon" /><div><p className="eyebrow">Privacidad</p><h1>Contraseñas seguras</h1><p>Genera contraseñas y frases aleatorias sin guardarlas ni enviarlas fuera del equipo.</p></div></div>
     <div className="password-panel">
       <div className="operation-tabs password-tabs"><button className={mode === "password" ? "operation-tab active" : "operation-tab"} onClick={() => setMode("password")}>Contraseña</button><button className={mode === "phrase" ? "operation-tab active" : "operation-tab"} onClick={() => setMode("phrase")}>Frase segura</button></div>
       <div className="password-output"><code>{value || "Activa al menos una opción"}</code><div><button className="secondary-button" onClick={generate} disabled={mode === "password" && !groups.length}><ArrowsClockwise /> Generar otra</button><button className="primary-button compact" onClick={() => void copy()} disabled={!value}>{copied ? <Check /> : <Copy />}{copied ? "Copiada" : "Copiar"}</button></div></div>

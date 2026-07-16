@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, FileText, FolderOpen } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { compareLines, pickTextFile } from "./text-diff.service";
 
 interface Props { onBack: () => void; }
@@ -19,7 +20,7 @@ export function TextDiff({ onBack }: Props) {
   }
 
   return <section className="tool-view"><button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon diff-icon"><FileText weight="duotone" /></span><div><p className="eyebrow">Productividad</p><h1>Comparador de texto</h1><p>Pega contenido o abre dos archivos para encontrar sus diferencias.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="text-diff" className="diff-icon" /><div><p className="eyebrow">Productividad</p><h1>Comparador de texto</h1><p>Pega contenido o abre dos archivos para encontrar sus diferencias.</p></div></div>
     <div className="diff-editors">
       <label><span><strong>{leftName}</strong><button onClick={() => void choose("left")}><FolderOpen /> Abrir archivo</button></span><textarea value={left} onChange={(event) => { setLeft(event.target.value); setLeftName("Texto original"); }} placeholder="Pega aquí el texto original" spellCheck={false} /></label>
       <label><span><strong>{rightName}</strong><button onClick={() => void choose("right")}><FolderOpen /> Abrir archivo</button></span><textarea value={right} onChange={(event) => { setRight(event.target.value); setRightName("Texto nuevo"); }} placeholder="Pega aquí el texto nuevo" spellCheck={false} /></label>

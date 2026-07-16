@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, ClipboardText, FolderOpen, Package, PlugsConnected, WarningCircle } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { getDependencyCenterStatus, type DependencyStatus } from "./dependency-center.service";
 import { getResourceManagerStatus, openResourceFolder, type ResourceManagerStatus } from "./resource-manager.service";
 
@@ -63,7 +64,7 @@ export function DependencyCenter({ onBack }: Props) {
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon dependency-icon"><PlugsConnected weight="duotone" /></span>
+        <ToolPixelIcon toolId="dependency-center" className="dependency-icon" />
         <div>
           <p className="eyebrow">Sistema</p>
           <h1>Centro de dependencias</h1>

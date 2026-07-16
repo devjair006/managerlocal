@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, DownloadSimple, FolderOpen, MusicNotes, VideoCamera } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import {
   downloadPermittedMedia,
   getMediaDownloaderRuntime,
@@ -65,7 +66,7 @@ export function MediaDownloader({ onBack }: Props) {
     <section className="tool-view">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon video-icon"><DownloadSimple weight="duotone" /></span>
+        <ToolPixelIcon toolId="media-downloader" className="video-icon" />
         <div>
           <p className="eyebrow">Multimedia</p>
           <h1>Descarga permitida</h1>

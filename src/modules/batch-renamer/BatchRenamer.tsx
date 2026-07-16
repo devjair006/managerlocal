@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowsClockwise, CheckCircle, Files } from "@phosphor-icons/react";
 import { OutputActions } from "../../components/OutputActions";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { batchRenamer, pickFilesToRename, type RenameResult } from "./batch-renamer.service";
 
 interface Props { onBack: () => void; }
@@ -22,7 +23,7 @@ export function BatchRenamer({ onBack }: Props) {
   async function rename() { setProcessing(true); try { const changed = await batchRenamer({ paths, prefix, suffix, find, replace, numbering, startNumber: start }); setResult(changed.length); setRenamed(changed); setPaths([]); setError(""); } catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)); } finally { setProcessing(false); } }
 
   return <section className="tool-view"><button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
-    <div className="tool-heading"><span className="tool-heading-icon rename-icon"><ArrowsClockwise weight="duotone" /></span><div><p className="eyebrow">Productividad</p><h1>Renombrar archivos</h1><p>Previsualiza y aplica reglas seguras a grupos de archivos.</p></div></div>
+    <div className="tool-heading"><ToolPixelIcon toolId="batch-renamer" className="rename-icon" /><div><p className="eyebrow">Productividad</p><h1>Renombrar archivos</h1><p>Previsualiza y aplica reglas seguras a grupos de archivos.</p></div></div>
     <div className="file-tool-panel"><div className="file-picker-row"><div><strong>Archivos</strong><small>{paths.length ? `${paths.length} seleccionados` : "Selecciona hasta 1000 archivos"}</small></div><button className="secondary-button" onClick={() => void choose()}><Files /> Seleccionar</button></div>
       <div className="rename-form"><label>Prefijo<input value={prefix} onChange={(event) => setPrefix(event.target.value)} placeholder="proyecto-" /></label><label>Sufijo<input value={suffix} onChange={(event) => setSuffix(event.target.value)} placeholder="-final" /></label><label>Buscar<input value={find} onChange={(event) => setFind(event.target.value)} /></label><label>Reemplazar<input value={replace} onChange={(event) => setReplace(event.target.value)} /></label><label className="check-field"><input type="checkbox" checked={numbering} onChange={(event) => setNumbering(event.target.checked)} /> Añadir numeración</label>{numbering && <label>Comenzar en<input type="number" min="0" value={start} onChange={(event) => setStart(Number(event.target.value))} /></label>}</div>
       {preview.length > 0 && <div className="rename-preview"><div><strong>Antes</strong><strong>Después</strong></div>{preview.slice(0, 30).map((item, index) => <div key={`${item.old}-${index}`}><span>{item.old}</span><span>{item.next}</span></div>)}{preview.length > 30 && <small>y {preview.length - 30} archivos más…</small>}</div>}

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ArrowLeft, DownloadSimple, Resize } from "@phosphor-icons/react";
+import { ToolPixelIcon } from "../../components/ToolPixelIcon";
 import { imageResizer } from "./image-resizer.service";
 
 interface Props {
@@ -84,7 +85,7 @@ export function ImageResizer({ onBack }: Props) {
     <section className="tool-view background-tool">
       <button className="back-button" onClick={onBack}><ArrowLeft /> Volver a herramientas</button>
       <div className="tool-heading">
-        <span className="tool-heading-icon"><Resize weight="duotone" /></span>
+        <ToolPixelIcon toolId="image-resizer" />
         <div>
           <p className="eyebrow">Imágenes</p>
           <h1>Redimensionar</h1>
